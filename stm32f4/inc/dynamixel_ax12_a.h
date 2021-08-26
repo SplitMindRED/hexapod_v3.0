@@ -106,12 +106,13 @@
 // Specials ///////////////////////////////////////////////////////////////
 #define OFF                         0
 #define ON                          1
-#define LEFT						0
+#define LEFT						      0
 #define RIGHT                       1
 #define AX_BYTE_READ                1
 #define AX_BYTE_READ_POS            2
-#define AX_RESET_LENGTH				2
-#define AX_ACTION_LENGTH			2
+#define AX_PING_LENGTH				   2
+#define AX_RESET_LENGTH				   2
+#define AX_ACTION_LENGTH			   2
 #define AX_ID_LENGTH                4
 #define AX_LR_LENGTH                4
 #define AX_SRL_LENGTH               4
@@ -136,7 +137,7 @@
 #define AX_PUNCH_LENGTH             5
 #define AX_SPEED_LENGTH             5
 #define AX_GOAL_SP_LENGTH           7
-#define AX_ACTION_CHECKSUM			250
+#define AX_ACTION_CHECKSUM			   250
 #define BROADCAST_ID                254
 #define AX_START                    255
 #define AX_CCW_AL_L                 255 
@@ -165,8 +166,6 @@ typedef struct ServoResponse
    uint8_t checksum;
 } ServoResponse;
 
-extern ServoResponse response;
-
 extern volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
 extern volatile uint8_t* volatile receiveBufferStart;
 extern volatile uint8_t* volatile receiveBufferEnd;
@@ -179,13 +178,16 @@ typedef enum ServoCommand
 } ServoCommand;
 
 // ping a servo, returns true if we get back the expected values
-bool pingServo(const uint8_t servoId);
+bool pingServo(const uint8_t servo_id);
 void sendServoCommand(const uint8_t servoId, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params);
 bool getServoResponse(void);
 bool getAndCheckResponse(const uint8_t servoId);
 void sendServoByte(const uint8_t byte);
 void setEndless(unsigned char ID, bool Status);
 void turn(unsigned char ID, int16_t speed);
+void clearServoReceiveBuffer(void);
+uint8_t getServoBytesAvailable(void);
+uint8_t getServoByte(void);
 
 void USART6_IRQHandler(void);
 

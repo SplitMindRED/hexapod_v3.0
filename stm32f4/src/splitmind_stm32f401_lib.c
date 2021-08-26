@@ -751,6 +751,8 @@ void sendByteArray(uint8_t* p, uint8_t length)
 	{
 		sendByte(p[i]);
 	}
+
+	uint8_t tmp = (uint8_t)USART_ReceiveData(USART6); // grab the byte from the data register
 }
 // void UART1_init(uint32_t baud_rate)
 // {

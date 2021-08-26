@@ -1,37 +1,6 @@
 #include "splitmind_stm32f401_lib.h"
 #include "dynamixel_ax12_a.h"
 
-void clearServoReceiveBuffer(void)
-{
-   receiveBufferStart = receiveBufferEnd;
-}
-
-uint8_t getServoBytesAvailable(void)
-{
-   volatile uint8_t* start = receiveBufferStart;
-   volatile uint8_t* end = receiveBufferEnd;
-
-   if (end >= start)
-   {
-      return (uint8_t)(end - start);
-   }
-   else
-   {
-      return (uint8_t)(REC_BUFFER_LEN - (start - end));
-   }
-}
-
-uint8_t getServoByte(void)
-{
-   receiveBufferStart++;
-   if (receiveBufferStart >= receiveBuffer + REC_BUFFER_LEN)
-   {
-      receiveBufferStart = receiveBuffer;
-   }
-
-   return *receiveBufferStart;
-}
-
 void init()
 {
    //change freq to 84 MHz
@@ -110,7 +79,7 @@ int main(void)
 
    while (1)
    {
-      testButton();
+      // testButton();
 
       setEndless(1, 1);
       turn(1, 100);
@@ -118,7 +87,6 @@ int main(void)
 
       pingServo(1);
       delayms(10);
-      int b = 0;
 
       // delayms(500);
       // GPIO_SetBits(GPIOA, GPIO_Pin_5); // Set C13 to High level ("1")
