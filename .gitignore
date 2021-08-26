@@ -1,0 +1,10 @@
+stm32f4/DebugConfig
+stm32f4/Listings
+stm32f4/Objects
+stm32f4/RTE
+stm32f4/*.Maxim
+stm32f4/*.uvoptx
+stm32f4/EventRecorderStub.scvd
+Logo
+Compass/*.cdw.bak
+*.html
