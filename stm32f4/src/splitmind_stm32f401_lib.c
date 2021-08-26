@@ -1,6 +1,6 @@
 #include "splitmind_stm32f401_lib.h"
 
-// unsigned long system_time = 0;
+volatile unsigned long system_time = 0;
 
 // //set mode of pin of port. look to define for parameters
 // void pinMode(uint8_t port, uint8_t pin, uint8_t mode, uint8_t config)
@@ -609,6 +609,146 @@ void SysTick_Handler(void)
 //END OF TIMERS------------------------------------------------------------------------------------------
 
 //UART----------------------------------------------------------------------------------------
+void usartInit()
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	/* Initialize USART6*/
+	// enable the USART6 clock
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
+
+	/* Configure USART6 Tx (PA.11) as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/* Configure USART6 Rx (PA.12) as input floating */ //or input with pull-up/-down
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	//   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	//  GPIO_InitStructure.GPIO_OType = GPIO_OType;
+	// GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	// connect the output pin to the peripheral's alt function
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_USART6);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_USART6);
+
+	USART_InitStructure.USART_BaudRate = 1000000;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+
+	USART_Init(USART6, &USART_InitStructure);
+
+	// configure the USART6 interrupt
+	NVIC_InitStructure.NVIC_IRQChannel = USART6_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	// NVIC_EnableIRQ(USART6_IRQn);
+
+	// enable the USART6 receive interrupt
+	USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+
+	/* Enable USART6 */
+	USART_Cmd(USART6, ENABLE);
+}
+
+void usartHalfDuplexInit()
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	clearServoReceiveBuffer();
+
+	/* Initialize USART6*/
+	// enable the USART6 clock
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
+
+	// Configure USART6 Tx (PA.11)
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	// GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	// connect the output pin to the peripheral's alt function
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_USART6);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_USART6);
+
+	USART_InitStructure.USART_BaudRate = 1000000;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+
+	USART_Init(USART6, &USART_InitStructure);
+
+	// configure the USART6 interrupt
+	NVIC_InitStructure.NVIC_IRQChannel = USART6_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	// enable the USART6 receive interrupt
+	USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+
+	// set USART6 to half-duplex
+	USART_HalfDuplexCmd(USART6, ENABLE);
+
+	/* Enable USART6 */
+	USART_Cmd(USART6, ENABLE);
+}
+
+void sendByteln(char c)
+{
+	USART_SendData(USART6, c);
+
+	while (USART_GetFlagStatus(USART6, USART_FLAG_TC) == RESET)
+	{
+
+	}
+
+	USART_SendData(USART6, '\n');
+
+	while (USART_GetFlagStatus(USART6, USART_FLAG_TC) == RESET)
+	{
+
+	}
+}
+
+void sendByte(uint8_t byte)
+{
+	USART_SendData(USART6, byte);
+
+	while (USART_GetFlagStatus(USART6, USART_FLAG_TC) == RESET)
+	{
+
+	}
+}
+
+void sendByteArray(uint8_t* p, uint8_t length)
+{
+	for (uint8_t i = 0; i < length; i++)
+	{
+		sendByte(p[i]);
+	}
+}
 // void UART1_init(uint32_t baud_rate)
 // {
 // 	RCC->APB2ENR |= RCC_APB2ENR_USART1EN;						//uart clock

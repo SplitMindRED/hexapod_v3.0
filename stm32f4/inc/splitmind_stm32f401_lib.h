@@ -16,6 +16,9 @@
 *
 ************************************************/
 
+#ifndef SPLITMIND_STM32F401_LIB_h
+#define SPLITMIND_STM32F401_LIB_h
+
 #include "stm32f4xx.h"                  // Device header
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
@@ -53,7 +56,7 @@
 // #define OUTPUT_AF_PUSH_PULL			(2)
 // #define OUTPUT_AF_OPEN_DRAIN			(3)
 
-extern volatile unsigned long system_time = 0;
+extern volatile unsigned long system_time;
 
 typedef struct SoftTimer_ms
 {
@@ -105,14 +108,22 @@ void SysTick_Handler(void);
 //END OF TIMERS-------------------------------------------------------------------------------
 
 //UART----------------------------------------------------------------------------------------
-void UART1_init(uint32_t baud_rate);
-void UART1_sendByte(char byte);
-void UART1_sendString(char* string);
-void UART1_print(long data);
-void UART1_print_str(char* string);
-void UART1_print_div(double data);
-void UART1_println(long data);
-void UART1_println_str(char* string);
-void UART1_println_div(double data);
-void UART1_printNumber(unsigned long number);
+void usartInit(void);
+void usartHalfDuplexInit(void);
+void sendByteln(char c);
+void sendByte(uint8_t byte);
+void sendByteArray(uint8_t* p, uint8_t length);
+
+// void UART1_init(uint32_t baud_rate);
+// void UART1_sendByte(char byte);
+// void UART1_sendString(char* string);
+// void UART1_print(long data);
+// void UART1_print_str(char* string);
+// void UART1_print_div(double data);
+// void UART1_println(long data);
+// void UART1_println_str(char* string);
+// void UART1_println_div(double data);
+// void UART1_printNumber(unsigned long number);
 //END OF UART---------------------------------------------------------------------------------
+
+#endif

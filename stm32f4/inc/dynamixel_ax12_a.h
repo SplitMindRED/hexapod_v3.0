@@ -1,10 +1,15 @@
 /***********************************************
 *	Dynamixel AX12-A
 *	Version 0.1
+*  0xFF 0xFF ID LENGTH INSTRUCTION PARAM_1 ... PARAM_N CHKSUM
+*  CHKSUM = ~(ID + LENGTH + INSTRUCTION + PARAM_1 + … PARAM_N)
+*  LENGTH = NUMBER_OF_INSTRUCTIONS + 2
 ************************************************/
 
-#ifndef AX12A_h
-#define AX12A_h
+#ifndef DYNAMIXEL_AX12_A_h
+#define DYNAMIXEL_AX12_A_h
+
+#include "splitmind_stm32f401_lib.h"
 
 #define REC_BUFFER_LEN            32
 #define SERVO_MAX_PARAMS          (REC_BUFFER_LEN - 5)
@@ -29,6 +34,15 @@
 #define CURRENT_SPEED             0x26
 #define GOAL_ANGLE                0x1e
 #define CURRENT_ANGLE             0x24
+
+// Instruction Set ///////////////////////////////////////////////////////////////
+#define AX_PING                     1
+#define AX_READ_DATA                2
+#define AX_WRITE_DATA               3
+#define AX_REG_WRITE                4
+#define AX_ACTION                   5
+#define AX_RESET                    6
+#define AX_SYNC_WRITE               131
 
 // EEPROM AREA  ///////////////////////////////////////////////////////////
 #define AX_MODEL_NUMBER_L           0
@@ -89,15 +103,6 @@
 #define AX_RETURN_READ              1
 #define AX_RETURN_ALL               2
 
-// Instruction Set ///////////////////////////////////////////////////////////////
-#define AX_PING                     1
-#define AX_READ_DATA                2
-#define AX_WRITE_DATA               3
-#define AX_REG_WRITE                4
-#define AX_ACTION                   5
-#define AX_RESET                    6
-#define AX_SYNC_WRITE               131
-
 // Specials ///////////////////////////////////////////////////////////////
 #define OFF                         0
 #define ON                          1
@@ -140,5 +145,50 @@
 #define TX_MODE                     1
 #define RX_MODE                     0
 #define LOCK                        1
+
+extern unsigned char Checksum;
+extern unsigned long delta;
+
+extern uint8_t servoErrorCode;
+extern uint8_t id;
+extern uint8_t byte1;
+extern bool flag;
+
+extern uint8_t arr[20];
+
+typedef struct ServoResponse
+{
+   uint8_t id;
+   uint8_t length;
+   uint8_t error;
+   uint8_t params[SERVO_MAX_PARAMS];
+   uint8_t checksum;
+} ServoResponse;
+
+extern ServoResponse response;
+
+extern volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
+extern volatile uint8_t* volatile receiveBufferStart;
+extern volatile uint8_t* volatile receiveBufferEnd;
+
+typedef enum ServoCommand
+{
+   PING = 1,
+   READ = 2,
+   WRITE = 3
+} ServoCommand;
+
+// ping a servo, returns true if we get back the expected values
+bool pingServo(const uint8_t servoId);
+void sendServoCommand(const uint8_t servoId, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params);
+bool getServoResponse(void);
+bool getAndCheckResponse(const uint8_t servoId);
+void sendServoByte(const uint8_t byte);
+void setEndless(unsigned char ID, bool Status);
+void turn(unsigned char ID, int16_t speed);
+
+void USART6_IRQHandler(void);
+
+
 
 #endif
