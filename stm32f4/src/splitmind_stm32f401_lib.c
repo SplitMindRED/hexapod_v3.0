@@ -618,6 +618,7 @@ void usartInit()
 	/* Initialize USART6*/
 	// enable the USART6 clock
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
 	/* Configure USART6 Tx (PA.11) as alternate function push-pull */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
@@ -675,6 +676,8 @@ void usartHalfDuplexInit()
 	/* Initialize USART6*/
 	// enable the USART6 clock
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
 
 	// Configure USART6 Tx (PA.11)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
