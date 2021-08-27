@@ -13,16 +13,16 @@ void init()
 
    // usartInit();
 
-   usartHalfDuplexInit();
+   // usartHalfDuplexInit();
 
-   // usartHalfDuplexInit1();
+   usartHalfDuplexInit1();
 
    //enable all interruptions
    __enable_irq();
 
    //disable uart rx interruption, so i will not catch my own tx bytes
-   USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
-   // USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+   // USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+   USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 
    GPIO_InitTypeDef  GPIO_InitStructure;
 
@@ -114,13 +114,13 @@ int main(void)
       delayms(100);
       pingServo(2);
       delayms(100);
+
       // getActualPosition(1);
 
       // delayms(500);
       // GPIO_SetBits(GPIOA, GPIO_Pin_5); // Set C13 to High level ("1")
       // delayms(500);
       // GPIO_ResetBits(GPIOA, GPIO_Pin_5); // Set C13 to Low level ("0")
-
 
       // delayms(500);
 

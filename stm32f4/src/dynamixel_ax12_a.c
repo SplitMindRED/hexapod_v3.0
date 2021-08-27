@@ -95,8 +95,8 @@ bool pingServo(const uint8_t servo_id)
 	packet[4] = AX_PING;
 	packet[5] = Checksum;
 
-	sendByteArray(packet, length);
-	// sendByteArray1(packet, length);
+	// sendByteArray(packet, length);
+	sendByteArray1(packet, length);
 
 
 	if (!getAndCheckResponse(servo_id))
@@ -149,8 +149,8 @@ bool getServoResponse(void)
 
 	clearServoReceiveBuffer();
 
-	USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
-	// USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+	// USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 
 	while (getServoBytesAvailable() < 4)
 	{
@@ -232,14 +232,14 @@ bool getAndCheckResponse(const uint8_t servo_id)
 #ifdef SERVO_DEBUG
 		printf("Servo error: Servo %d did not respond correctly or at all\n", (int)servo_id);
 #endif
-		USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
-		// USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+		// USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+		USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 
 		return false;
 	}
 
-	USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
-	// USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+	// USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+	USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 
 	if (response.id != servo_id)
 	{
@@ -291,8 +291,8 @@ void turn(unsigned char ID, int16_t speed)
 	// packet[7] = 0x00;
 	// packet[8] = 0x72;
 
-	// sendByteArray1(packet, length);
-	sendByteArray(packet, length);
+	sendByteArray1(packet, length);
+	// sendByteArray(packet, length);
 }
 
 void setEndless(unsigned char ID, bool status)
@@ -322,8 +322,8 @@ void setEndless(unsigned char ID, bool status)
 	// packet[7] = 0x00;
 	// packet[8] = 0xEE;
 
-	sendByteArray(packet, length);
-	// sendByteArray1(packet, length);
+	// sendByteArray(packet, length);
+	sendByteArray1(packet, length);
 
 }
 
