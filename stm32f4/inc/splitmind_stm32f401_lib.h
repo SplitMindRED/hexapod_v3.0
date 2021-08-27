@@ -110,9 +110,12 @@ void SysTick_Handler(void);
 //UART----------------------------------------------------------------------------------------
 void usartInit(void);
 void usartHalfDuplexInit(void);
+void usartHalfDuplexInit1(void);
 void sendByteln(char c);
 void sendByte(uint8_t byte);
 void sendByteArray(uint8_t* p, uint8_t length);
+void sendByte1(uint8_t byte);
+void sendByteArray1(uint8_t* p, uint8_t length);
 
 // void UART1_init(uint32_t baud_rate);
 // void UART1_sendByte(char byte);

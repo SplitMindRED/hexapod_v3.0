@@ -678,7 +678,6 @@ void usartHalfDuplexInit()
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
-
 	// Configure USART6 Tx (PA.11)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
@@ -718,6 +717,66 @@ void usartHalfDuplexInit()
 	USART_Cmd(USART6, ENABLE);
 }
 
+void usartHalfDuplexInit1()
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	clearServoReceiveBuffer();
+
+	/* Initialize USART1*/
+	// enable the USART1 clock
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	// Configure USART1 Tx (PA.09)
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	// // Configure USART1 Rx (PA.10)
+	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	// GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	// GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	// GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	// connect the output pin to the peripheral's alt function
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
+
+	USART_InitStructure.USART_BaudRate = 1000000;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+
+	USART_Init(USART1, &USART_InitStructure);
+
+	// configure the USART1 interrupt
+	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	// enable the USART1 receive interrupt
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+
+	// set USART1 to half-duplex
+	USART_HalfDuplexCmd(USART1, ENABLE);
+
+	/* Enable USART1 */
+	USART_Cmd(USART1, ENABLE);
+}
+
+
 void sendByteln(char c)
 {
 	USART_SendData(USART6, c);
@@ -743,6 +802,26 @@ void sendByte(uint8_t byte)
 	{
 
 	}
+}
+
+void sendByte1(uint8_t byte)
+{
+	USART_SendData(USART1, byte);
+
+	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
+	{
+
+	}
+}
+
+void sendByteArray1(uint8_t* p, uint8_t length)
+{
+	for (uint8_t i = 0; i < length; i++)
+	{
+		sendByte1(p[i]);
+	}
+
+	uint8_t tmp = (uint8_t)USART_ReceiveData(USART1); // grab the byte from the data register
 }
 
 void sendByteArray(uint8_t* p, uint8_t length)

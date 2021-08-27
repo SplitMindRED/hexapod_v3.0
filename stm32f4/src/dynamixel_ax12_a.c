@@ -11,12 +11,13 @@ uint8_t servoErrorCode = 0;
 uint8_t id = 0;
 uint8_t byte1 = 0;
 bool flag = 0;
-uint8_t arr[20];
 volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
 volatile uint8_t* volatile receiveBufferStart = receiveBuffer;
 volatile uint8_t* volatile receiveBufferEnd = receiveBuffer;
 
 ServoResponse response;
+
+uint8_t arr[20];
 
 void USART6_IRQHandler(void)
 {
@@ -26,6 +27,37 @@ void USART6_IRQHandler(void)
 		static uint8_t count = 0;
 
 		const uint8_t byte = (uint8_t)USART_ReceiveData(USART6); // grab the byte from the data register
+		byte1 = byte;
+
+		if (count < 20)
+		{
+			arr[count] = byte1;
+			count++;
+		}
+		else
+		{
+			count = 0;
+			arr[count] = byte1;
+		}
+
+		receiveBufferEnd++;
+		if (receiveBufferEnd >= receiveBuffer + REC_BUFFER_LEN)
+		{
+			receiveBufferEnd = receiveBuffer;
+		}
+
+		*receiveBufferEnd = byte;
+	}
+}
+
+void USART1_IRQHandler(void)
+{
+	// check if the USART1 receive interrupt flag was set
+	if (USART_GetITStatus(USART1, USART_IT_RXNE))
+	{
+		static uint8_t count = 0;
+
+		const uint8_t byte = (uint8_t)USART_ReceiveData(USART1); // grab the byte from the data register
 		byte1 = byte;
 
 		if (count < 20)
@@ -64,6 +96,8 @@ bool pingServo(const uint8_t servo_id)
 	packet[5] = Checksum;
 
 	sendByteArray(packet, length);
+	// sendByteArray1(packet, length);
+
 
 	if (!getAndCheckResponse(servo_id))
 	{
@@ -77,13 +111,13 @@ bool pingServo(const uint8_t servo_id)
 	return true;
 }
 
-void sendServoCommand(const uint8_t servoId, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params)
+void sendServoCommand(const uint8_t servo_id, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params)
 {
 	sendServoByte(0xff);
 	sendServoByte(0xff);  // command header
 
-	sendServoByte(servoId);  // servo ID
-	uint8_t checksum = servoId;
+	sendServoByte(servo_id);  // servo ID
+	uint8_t checksum = servo_id;
 
 	sendServoByte(numParams + 2);  // number of following bytes
 	sendServoByte((uint8_t)commandByte);  // command
@@ -116,6 +150,7 @@ bool getServoResponse(void)
 	clearServoReceiveBuffer();
 
 	USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+	// USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 
 	while (getServoBytesAvailable() < 4)
 	{
@@ -190,20 +225,23 @@ bool getServoResponse(void)
 	return true;
 }
 
-bool getAndCheckResponse(const uint8_t servoId)
+bool getAndCheckResponse(const uint8_t servo_id)
 {
 	if (!getServoResponse())
 	{
 #ifdef SERVO_DEBUG
-		printf("Servo error: Servo %d did not respond correctly or at all\n", (int)servoId);
+		printf("Servo error: Servo %d did not respond correctly or at all\n", (int)servo_id);
 #endif
 		USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+		// USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+
 		return false;
 	}
 
 	USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+	// USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 
-	if (response.id != servoId)
+	if (response.id != servo_id)
 	{
 #ifdef SERVO_DEBUG
 		printf("Servo error: Response ID %d does not match command ID %d\n", (int)response.id);
@@ -253,10 +291,11 @@ void turn(unsigned char ID, int16_t speed)
 	// packet[7] = 0x00;
 	// packet[8] = 0x72;
 
+	// sendByteArray1(packet, length);
 	sendByteArray(packet, length);
 }
 
-void setEndless(unsigned char ID, bool Status)
+void setEndless(unsigned char ID, bool status)
 {
 	const unsigned int length = 9;
 	unsigned char packet[length];
@@ -284,6 +323,8 @@ void setEndless(unsigned char ID, bool Status)
 	// packet[8] = 0xEE;
 
 	sendByteArray(packet, length);
+	// sendByteArray1(packet, length);
+
 }
 
 void clearServoReceiveBuffer(void)
@@ -316,4 +357,92 @@ uint8_t getServoByte(void)
 
 	return *receiveBufferStart;
 }
+
+bool changeID(uint8_t new_id)
+{
+	const unsigned int length = 8;
+	unsigned char packet[length];
+
+	Checksum = (~(BROADCAST_ID + AX_ID_LENGTH + AX_WRITE_DATA + AX_ID + new_id));
+
+	packet[0] = AX_START;
+	packet[1] = AX_START;
+	packet[2] = BROADCAST_ID;
+	packet[3] = AX_ID_LENGTH;
+	packet[4] = AX_WRITE_DATA;
+	packet[5] = AX_ID;
+	packet[6] = new_id;
+	packet[7] = Checksum;
+
+	sendByteArray(packet, length);
+
+	delayms(100);
+
+	if (pingServo(new_id))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void getActualPosition(uint8_t id)
+{
+	const unsigned int length = 8;
+	unsigned char packet[length];
+
+	Checksum = (~(id + AX_POS_LENGTH + AX_READ_DATA + AX_PRESENT_POSITION_L + AX_BYTE_READ_POS));
+
+	packet[0] = AX_START;
+	packet[1] = AX_START;
+	packet[2] = id;
+	packet[3] = AX_POS_LENGTH;
+	packet[4] = AX_READ_DATA;
+	packet[5] = AX_PRESENT_POSITION_L;
+	packet[6] = AX_BYTE_READ_POS;
+	packet[7] = Checksum;
+
+	sendByteArray(packet, length);
+
+	// delayms(100);
+
+	USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+
+	uint8_t retries = 0;
+
+	while (getServoBytesAvailable() < 5)
+	{
+		retries++;
+		if (retries > REC_WAIT_MAX_RETRIES)
+		{
+			USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+
+			return false;
+		}
+
+		delayus(REC_WAIT_START_US);
+	}
+	retries = 0;
+
+	getServoByte();  // servo header (two 0xff bytes)
+	getServoByte();
+
+	response.id = getServoByte();
+	response.length = getServoByte();
+	response.error = getServoByte();
+	response.params[0] = getServoByte();
+	response.params[1] = getServoByte();
+
+	USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+
+	// if (!getAndCheckResponse(id))
+	// {
+	// 	return false;
+	// }
+
+	// return true;
+}
+
 

@@ -12,13 +12,17 @@ void init()
    systemTimeInit();
 
    // usartInit();
+
    usartHalfDuplexInit();
+
+   // usartHalfDuplexInit1();
 
    //enable all interruptions
    __enable_irq();
 
    //disable uart rx interruption, so i will not catch my own tx bytes
    USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+   // USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 
    GPIO_InitTypeDef  GPIO_InitStructure;
 
@@ -32,10 +36,12 @@ void init()
    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-   GPIO_SetBits(GPIOA, GPIO_Pin_5); // Set C13 to High level ("1")
+   // GPIO_SetBits(GPIOA, GPIO_Pin_5); // Set C13 to High level ("1")
+   GPIO_ResetBits(GPIOA, GPIO_Pin_5); // Set C13 to Low level ("0")
 
-   /* Initialize Button input PC13 */
-   // Enable PORTB Clock
+
+/* Initialize Button input PC13 */
+// Enable PORTB Clock
    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
    /* Configure the GPIO_BUTTON pin */
@@ -77,16 +83,38 @@ int main(void)
 {
    init();
 
+   // pingServo(1);
+   // delayms(100);
+
+   // changeID(2);
+
    while (1)
    {
       // testButton();
 
       setEndless(1, 1);
-      turn(1, 100);
-      delayms(10);
+      setEndless(2, 1);
+      turn(1, 250);
+      turn(2, 250 + 1024);
 
+      // for (uint16_t i = 0; i < 2047; i++)
+      // {
+      //    turn(1, i);
+      //    delayms(10);
+      // }
+
+      // for (uint16_t i = 1024; i < 2047; i++)
+      // {
+      //    turn(1, i);
+      //    delayms(10);
+      // }
+
+      delayms(100);
       pingServo(1);
-      delayms(10);
+      delayms(100);
+      pingServo(2);
+      delayms(100);
+      // getActualPosition(1);
 
       // delayms(500);
       // GPIO_SetBits(GPIOA, GPIO_Pin_5); // Set C13 to High level ("1")

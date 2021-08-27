@@ -155,8 +155,6 @@ extern uint8_t id;
 extern uint8_t byte1;
 extern bool flag;
 
-extern uint8_t arr[20];
-
 typedef struct ServoResponse
 {
    uint8_t id;
@@ -179,17 +177,21 @@ typedef enum ServoCommand
 
 // ping a servo, returns true if we get back the expected values
 bool pingServo(const uint8_t servo_id);
-void sendServoCommand(const uint8_t servoId, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params);
+void sendServoCommand(const uint8_t servo_id, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params);
 bool getServoResponse(void);
-bool getAndCheckResponse(const uint8_t servoId);
+bool getAndCheckResponse(const uint8_t servo_id);
 void sendServoByte(const uint8_t byte);
-void setEndless(unsigned char ID, bool Status);
-void turn(unsigned char ID, int16_t speed);
+void setEndless(unsigned char id, bool status);
+void turn(unsigned char id, int16_t speed);
 void clearServoReceiveBuffer(void);
 uint8_t getServoBytesAvailable(void);
 uint8_t getServoByte(void);
+bool changeID(uint8_t new_id);
+void getActualPosition(uint8_t id);
 
 void USART6_IRQHandler(void);
+void USART1_IRQHandler(void);
+
 
 
 
