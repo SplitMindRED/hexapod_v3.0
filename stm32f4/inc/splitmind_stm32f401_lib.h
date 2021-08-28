@@ -78,10 +78,10 @@ bool checkTimer(SoftTimer_ms* timer);
 void changeCoreFrequency(void);
 
 //hard delay in milliseconds, empty cycle
-bool delayms(int millisec);
+bool delayms(uint32_t millisec);
 
 //hard delay in microseconds, empty cycle
-bool delayus(int microsec);
+bool delayus(uint32_t microsec);
 
 //I2C------------------------------------------------------------------------------------------
 // void I2C1_init(void);

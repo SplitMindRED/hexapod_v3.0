@@ -89,9 +89,11 @@ int main(void)
    // changeID(2);
 
    jointMode(2);
+   turn(2, 100);
 
    double angle_to_hex = 1024.0 / 300.0;
    double start_angle = 150 * angle_to_hex;
+   uint32_t pause = 6000;
 
    while (1)
    {
@@ -102,17 +104,16 @@ int main(void)
       // turn(1, 250);
       // turn(2, 250 + 1024);
 
-
-      setAngle(2, (uint16_t)start_angle);
-      delayms(2000);
       setAngle(2, 1023);
-      delayms(2000);
+      delayms(pause);
       setAngle(2, (uint16_t)(start_angle + 90 * angle_to_hex));
-      delayms(2000);
+      delayms(pause);
+      setAngle(2, (uint16_t)start_angle);
+      delayms(pause);
       setAngle(2, (uint16_t)(start_angle - 90 * angle_to_hex));
-      delayms(2000);
+      delayms(pause);
       setAngle(2, 0);
-      delayms(2000);
+      delayms(pause);
 
       // for (uint16_t i = 0; i < 2047; i++)
       // {

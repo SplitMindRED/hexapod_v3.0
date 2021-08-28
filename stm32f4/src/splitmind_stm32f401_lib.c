@@ -32,11 +32,11 @@ void digitalWrite(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, bool value)
 {
 	if (value == 1)
 	{
-		GPIO_SetBits(GPIOx, GPIO_Pin); // Set pin to Low level ("0")
+		GPIO_SetBits(GPIOx, GPIO_Pin_5); // Set pin to Low level ("0")
 	}
 	else if (value == 0)
 	{
-		GPIO_ResetBits(GPIOx, GPIO_Pin); // Set pin to Low level ("0")
+		GPIO_ResetBits(GPIOx, GPIO_Pin_5); // Set pin to Low level ("0")
 	}
 }
 
@@ -72,9 +72,11 @@ void changeCoreFrequency()
 	SystemCoreClockUpdate();
 }
 
-bool delayms(int millisec)
+bool delayms(uint32_t millisec)
 {
-	unsigned long next_time = system_time + (millisec * SYSTICKFREQ / 1000);
+   uint32_t a = SYSTICKFREQ / 1000;
+	uint32_t d = millisec * a;
+	unsigned long next_time = system_time + d;
 
 	while (system_time <= next_time)
 	{
@@ -84,7 +86,7 @@ bool delayms(int millisec)
 	return 1;
 }
 
-bool delayus(int microsec)
+bool delayus(uint32_t microsec)
 {
 	unsigned long next_time = system_time + microsec;
 
