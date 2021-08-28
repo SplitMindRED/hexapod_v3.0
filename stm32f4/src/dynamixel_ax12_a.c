@@ -445,4 +445,47 @@ void getActualPosition(uint8_t id)
 	// return true;
 }
 
+void jointMode(uint8_t id)
+{
+	const unsigned int length = 9;
+	unsigned char packet[length];
+	uint8_t limit_l = 1023;
+	uint8_t limit_h = 1023 >> 8;
+
+	Checksum = (~(id + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_CCW_ANGLE_LIMIT_L + limit_l + limit_h));
+
+	packet[0] = AX_START;
+	packet[1] = AX_START;
+	packet[2] = id;
+	packet[3] = AX_GOAL_LENGTH;
+	packet[4] = AX_WRITE_DATA;
+	packet[5] = AX_CCW_ANGLE_LIMIT_L;
+	packet[6] = limit_l;
+	packet[7] = limit_h;
+	packet[8] = Checksum;
+
+	sendByteArray1(packet, length);
+}
+
+void setAngle(uint8_t id, uint16_t angle)
+{
+	const unsigned int length = 9;
+	unsigned char packet[length];
+	uint8_t angle_l = angle;
+	uint8_t angle_h = angle >> 8;
+
+	Checksum = (~(id + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_GOAL_POSITION_L + angle_l + angle_h));
+
+	packet[0] = AX_START;
+	packet[1] = AX_START;
+	packet[2] = id;
+	packet[3] = AX_GOAL_LENGTH;
+	packet[4] = AX_WRITE_DATA;
+	packet[5] = AX_GOAL_POSITION_L;
+	packet[6] = angle_l;
+	packet[7] = angle_h;
+	packet[8] = Checksum;
+
+	sendByteArray1(packet, length);
+}
 

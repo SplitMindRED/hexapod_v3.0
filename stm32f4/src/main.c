@@ -88,14 +88,31 @@ int main(void)
 
    // changeID(2);
 
+   jointMode(2);
+
+   double angle_to_hex = 1024.0 / 300.0;
+   double start_angle = 150 * angle_to_hex;
+
    while (1)
    {
       // testButton();
 
-      setEndless(1, 1);
-      setEndless(2, 1);
-      turn(1, 250);
-      turn(2, 250 + 1024);
+      // setEndless(1, 1);
+      // setEndless(2, 1);
+      // turn(1, 250);
+      // turn(2, 250 + 1024);
+
+
+      setAngle(2, (uint16_t)start_angle);
+      delayms(2000);
+      setAngle(2, 1023);
+      delayms(2000);
+      setAngle(2, (uint16_t)(start_angle + 90 * angle_to_hex));
+      delayms(2000);
+      setAngle(2, (uint16_t)(start_angle - 90 * angle_to_hex));
+      delayms(2000);
+      setAngle(2, 0);
+      delayms(2000);
 
       // for (uint16_t i = 0; i < 2047; i++)
       // {
@@ -109,11 +126,11 @@ int main(void)
       //    delayms(10);
       // }
 
-      delayms(100);
-      pingServo(1);
-      delayms(100);
-      pingServo(2);
-      delayms(100);
+      // delayms(100);
+      // pingServo(1);
+      // delayms(100);
+      // pingServo(2);
+      // delayms(100);
 
       // getActualPosition(1);
 

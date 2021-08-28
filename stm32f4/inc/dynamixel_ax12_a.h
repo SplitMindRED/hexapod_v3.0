@@ -188,6 +188,8 @@ uint8_t getServoBytesAvailable(void);
 uint8_t getServoByte(void);
 bool changeID(uint8_t new_id);
 void getActualPosition(uint8_t id);
+void jointMode(uint8_t id);
+void setAngle(uint8_t id, uint16_t angle);
 
 void USART6_IRQHandler(void);
 void USART1_IRQHandler(void);
