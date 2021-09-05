@@ -74,9 +74,9 @@ void changeCoreFrequency()
 
 bool delayms(uint32_t millisec)
 {
-   uint32_t a = SYSTICKFREQ / 1000;
-	uint32_t d = millisec * a;
-	unsigned long next_time = system_time + d;
+	uint32_t a = SYSTICKFREQ / 1000;
+	uint32_t d = millisec * (SYSTICKFREQ / 1000);
+	unsigned long next_time = system_time + millisec * (SYSTICKFREQ / 1000);
 
 	while (system_time <= next_time)
 	{

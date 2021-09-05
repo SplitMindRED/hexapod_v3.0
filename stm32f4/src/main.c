@@ -79,6 +79,16 @@ void testButton()
    }
 }
 
+void testMove(uint16_t pause)
+{
+   setEndless(2, 1);
+   turn(2, 100);
+   delayms(pause);
+   turn(1, 250);
+   turn(2, 250 + 1024);
+   delayms(pause);
+}
+
 int main(void)
 {
    init();
@@ -88,32 +98,38 @@ int main(void)
 
    // changeID(2);
 
-   jointMode(2);
+   // jointMode(2);
+   // setEndless(1, 1);
+
+   setEndless(2, 1);
    turn(2, 100);
 
    double angle_to_hex = 1024.0 / 300.0;
    double start_angle = 150 * angle_to_hex;
-   uint32_t pause = 6000;
+   uint32_t pause = 1000;
 
    while (1)
    {
       // testButton();
 
-      // setEndless(1, 1);
-      // setEndless(2, 1);
-      // turn(1, 250);
-      // turn(2, 250 + 1024);
+      testMove(500);
 
-      setAngle(2, 1023);
-      delayms(pause);
-      setAngle(2, (uint16_t)(start_angle + 90 * angle_to_hex));
-      delayms(pause);
-      setAngle(2, (uint16_t)start_angle);
-      delayms(pause);
-      setAngle(2, (uint16_t)(start_angle - 90 * angle_to_hex));
-      delayms(pause);
-      setAngle(2, 0);
-      delayms(pause);
+      // jointMode(2);
+      // delayms(100);
+      // setAngle(2, 1023);
+      // delayms(pause);
+
+      // jointMode(2);
+      // delayms(100);
+      // setAngle(2, (uint16_t)(start_angle + 90 * angle_to_hex));
+      // delayms(pause);
+
+      // setAngle(2, (uint16_t)start_angle);
+      // delayms(pause);
+      // setAngle(2, (uint16_t)(start_angle - 90 * angle_to_hex));
+      // delayms(pause);
+      // setAngle(2, 0);
+      // delayms(pause);
 
       // for (uint16_t i = 0; i < 2047; i++)
       // {
