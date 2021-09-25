@@ -23,28 +23,37 @@ void pushButton()
    }
 }
 
+void testMove(uint16_t pause)
+{
+   setEndless(UART1, 2, 1);
+   turn(UART1, 2, 100);
+   HAL_Delay(pause);
+   turn(UART1, 2, 250 + 1024);
+   HAL_Delay(pause);
+}
+
 int main()
 {
    setup();
 
    while (1)
    {
-      pushButton();
+      pingServo(UART1, 2);
 
-      // uint8_t buf[20];
-      // strcpy((char *)buf, "who: \r\n");
-      // HAL_UART_Transmit(&huart2, buf, strlen((char *)buf), HAL_MAX_DELAY);
-      // HAL_Delay(500);
-      UART_print(UDBG, -9578);
-      HAL_Delay(500);
-      UART_printStr(UDBG, "hello");
-      HAL_Delay(500);
-      UART_printStrLn(UDBG, " hello x2 ");
-      HAL_Delay(500);
-      UART_printLn(UDBG, -100);
-      HAL_Delay(500);
-      UART_printDivLn(UDBG, -0.12);
-      HAL_Delay(500);
+      // uint8_t response1[20];
+
+      // for (uint8_t i = 0; i < 20; i++)
+      // {
+      //    response1[i] = 0;
+      // }
+
+      // HAL_UART_Receive(UART2, response1, 3, HAL_MAX_DELAY);
+
+
+      HAL_Delay(100);
+      // pushButton();
+      testMove(500);
+      // UART_printLn(HAL_GetTick());
    }
 
    return 0;

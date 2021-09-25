@@ -3,6 +3,7 @@
 *	Version 0.1
 *  0xFF 0xFF ID LENGTH INSTRUCTION PARAM_1 ... PARAM_N CHKSUM
 *  CHKSUM = ~(ID + LENGTH + INSTRUCTION + PARAM_1 + … PARAM_N)
+ * Status Checksum = ~( ID + Length + Error + Parameter1 + … Parameter N )
 *  LENGTH = NUMBER_OF_INSTRUCTIONS + 2
 ************************************************/
 
@@ -148,12 +149,9 @@
 #define RX_MODE                     0
 #define LOCK                        1
 
-extern unsigned char Checksum;
 extern unsigned long delta;
 
 extern uint8_t servoErrorCode;
-extern uint8_t id;
-extern uint8_t byte1;
 extern bool flag;
 
 typedef struct ServoResponse
@@ -166,8 +164,8 @@ typedef struct ServoResponse
 } ServoResponse;
 
 extern volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
-extern volatile uint8_t* volatile receiveBufferStart;
-extern volatile uint8_t* volatile receiveBufferEnd;
+extern volatile uint8_t *volatile receiveBufferStart;
+extern volatile uint8_t *volatile receiveBufferEnd;
 
 typedef enum ServoCommand
 {
@@ -177,13 +175,16 @@ typedef enum ServoCommand
 } ServoCommand;
 
 // ping a servo, returns true if we get back the expected values
-bool pingServo(const uint8_t servo_id);
-void sendServoCommand(const uint8_t servo_id, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params);
+bool pingServo(UART_HandleTypeDef *huart, const uint8_t servo_id);
+
+void sendServoCommand(const uint8_t servo_id, const ServoCommand commandByte, const uint8_t numParams, const uint8_t *params);
 bool getServoResponse(void);
 bool getAndCheckResponse(const uint8_t servo_id);
 void sendServoByte(const uint8_t byte);
-void setEndless(unsigned char id, bool status);
-void turn(unsigned char id, int16_t speed);
+
+void setEndless(UART_HandleTypeDef *huart, unsigned char id, bool status);
+void turn(UART_HandleTypeDef *huart, unsigned char id, int16_t speed);
+
 void clearServoReceiveBuffer(void);
 uint8_t getServoBytesAvailable(void);
 uint8_t getServoByte(void);
@@ -192,7 +193,7 @@ void getActualPosition(uint8_t id);
 void jointMode(uint8_t id);
 void setAngle(uint8_t id, uint16_t angle);
 
-void USART6_IRQHandler(void);
-void USART1_IRQHandler(void);
+// void USART6_IRQHandler(void);
+// void USART1_IRQHandler(void);
 
 #endif

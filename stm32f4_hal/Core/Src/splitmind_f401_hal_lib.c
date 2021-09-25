@@ -8,7 +8,9 @@ volatile unsigned long system_time = 0;
   ******************************************************************************
 */
 
-void UART_printNumber(UART_HandleTypeDef *huart, unsigned long number)
+#ifdef UART_DEBUG
+
+void UART_printNumber(unsigned long number)
 {
    char string[11];
    char *pointer = &string[sizeof(string) - 1];
@@ -31,56 +33,57 @@ void UART_printNumber(UART_HandleTypeDef *huart, unsigned long number)
       }
    }
 
-   HAL_UART_Transmit(huart, (uint8_t *)(pointer + 1), strlen((char *)(pointer + 1)), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UDBG, (uint8_t *)(pointer + 1), strlen((char *)(pointer + 1)), HAL_MAX_DELAY);
+
 }
 
-void UART_sendByte(UART_HandleTypeDef *huart, char byte)
+void UART_sendByte(char byte)
 {
-   HAL_UART_Transmit(huart, (uint8_t *)(&byte), 1, HAL_MAX_DELAY);
+   HAL_UART_Transmit(UDBG, (uint8_t *)(&byte), 1, HAL_MAX_DELAY);
 }
 
-void UART_print(UART_HandleTypeDef *huart, long data)
+void UART_print(long data)
 {
    if (data < 0)
    {
-      UART_sendByte(huart, '-');
+      UART_sendByte('-');
       data = -data;
    }
 
-   UART_printNumber(huart, data);
+   UART_printNumber(data);
 }
 
-void UART_printStr(UART_HandleTypeDef *huart, char *string)
+void UART_printStr(char *string)
 {
-   HAL_UART_Transmit(huart, (uint8_t *)string, strlen(string), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UDBG, (uint8_t *)string, strlen(string), HAL_MAX_DELAY);
 }
 
-void UART_printDiv(UART_HandleTypeDef *huart, double data)
+void UART_printDiv(double data)
 {
    if (isnan(data))
    {
-      UART_printStr(huart, "nan");
+      UART_printStr("nan");
       return;
    }
    else if (isinf(data))
    {
-      UART_printStr(huart, "inf");
+      UART_printStr("inf");
       return;
    }
    else if (data > 4294967040.0)
    {
-      UART_printStr(huart, "ovf");
+      UART_printStr("ovf");
       return;
    }
    else if (data < -4294967040.0)
    {
-      UART_printStr(huart, "-ovf");
+      UART_printStr("-ovf");
       return;
    }
 
    if (data < 0.0)
    {
-      UART_sendByte(huart, '-');
+      UART_sendByte('-');
       data = -data;
    }
 
@@ -101,31 +104,33 @@ void UART_printDiv(UART_HandleTypeDef *huart, double data)
       number_right = (long)rounding % 100;
    }
 
-   UART_print(huart, number_left);
-   UART_sendByte(huart, '.');
-   UART_print(huart, number_right);
+   UART_print(number_left);
+   UART_sendByte('.');
+   UART_print(number_right);
 }
 
-void UART_printLn(UART_HandleTypeDef *huart, long data)
+void UART_printLn(long data)
 {
-   UART_print(huart, data);
+   UART_print(data);
 
-   UART_sendByte(huart, '\n');
+   UART_sendByte('\n');
 }
 
-void UART_printStrLn(UART_HandleTypeDef *huart, char *string)
+void UART_printStrLn(char *string)
 {
-   UART_printStr(huart, string);
+   UART_printStr(string);
 
-   UART_sendByte(huart, '\n');
+   UART_sendByte('\n');
 }
 
-void UART_printDivLn(UART_HandleTypeDef *huart, double data)
+void UART_printDivLn(double data)
 {
-   UART_printDiv(huart, data);
+   UART_printDiv(data);
 
-   UART_sendByte(huart, '\n');
+   UART_sendByte('\n');
 }
+
+#endif
 /*
   ******************************************************************************
 */
