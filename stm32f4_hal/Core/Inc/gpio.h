@@ -16,7 +16,7 @@
   *
   ******************************************************************************
   */
-/* Define to prevent recursive inclusion -------------------------------------*/
+  /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
+  /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
@@ -35,11 +35,11 @@ extern "C" {
 
 /* USER CODE END Private defines */
 
-void MX_GPIO_Init(void);
+  void MX_GPIO_Init(void);
 
-/* USER CODE BEGIN Prototypes */
+  /* USER CODE BEGIN Prototypes */
 
-/* USER CODE END Prototypes */
+  /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }
