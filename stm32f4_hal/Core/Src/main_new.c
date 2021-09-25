@@ -25,10 +25,15 @@ void pushButton()
 
 void testMove(uint16_t pause)
 {
-   setEndless(UART1, 2, 1);
-   turn(UART1, 2, 100);
+   wheelMode(1, 1);
+   wheelMode(2, 1);
+
+   setVelocity(1, 100);
+   setVelocity(2, 100);
+
    HAL_Delay(pause);
-   // turn(UART1, 2, 100 + 1024);
+   setVelocity(1, 100 + 1024);
+   setVelocity(2, 100 + 1024);
    HAL_Delay(pause);
 }
 
@@ -38,23 +43,22 @@ int main()
 
    while (1)
    {
-      pingServo(UART1, 2);
+      pingServo(1);
+      pingServo(2);
 
-      // uint8_t response1[20];
-
-      // for (uint8_t i = 0; i < 20; i++)
-      // {
-      //    response1[i] = 0;
-      // }
-
-      // HAL_UART_Receive(UART2, response1, 3, HAL_MAX_DELAY);
-
-
-      HAL_Delay(100);
+      // HAL_Delay(100);
       // pushButton();
       testMove(500);
 
-      getActualPosition(UART1, 2);
+      // unsigned long t1 = 0, t2 = 0;
+
+      // t1 = HAL_GetTick();
+      getPosition(2);
+      // t2 = HAL_GetTick();
+
+      // UART_printStr("t: ");
+      // UART_printLn(t2 - t1);
+
       // UART_printLn(HAL_GetTick());
    }
 

@@ -175,25 +175,20 @@ typedef enum ServoCommand
 } ServoCommand;
 
 // ping a servo, returns true if we get back the expected values
-bool pingServo(UART_HandleTypeDef *huart, const uint8_t servo_id);
+bool pingServo(uint8_t servo_id);
+bool changeId(uint8_t new_id);
 
-void sendServoCommand(const uint8_t servo_id, const ServoCommand commandByte, const uint8_t numParams, const uint8_t *params);
-bool getServoResponse(void);
-bool getAndCheckResponse(const uint8_t servo_id);
-void sendServoByte(const uint8_t byte);
+void jointMode(uint8_t servo_id);
+void wheelMode(uint8_t servo_id, bool status);
 
-void setEndless(UART_HandleTypeDef *huart, unsigned char id, bool status);
-void turn(UART_HandleTypeDef *huart, unsigned char id, int16_t speed);
+int16_t getPosition(uint8_t servo_id);
+void getVelocity(uint8_t servo_id);
+void getTorque(uint8_t servo_id);
 
-void clearServoReceiveBuffer(void);
-uint8_t getServoBytesAvailable(void);
-uint8_t getServoByte(void);
-bool changeID(uint8_t new_id);
-void getActualPosition(UART_HandleTypeDef *huart, uint8_t id);
-void jointMode(uint8_t id);
-void setAngle(uint8_t id, uint16_t angle);
+void setAngle(uint8_t servo_id, uint16_t angle);
+void setVelocity(uint8_t servo_id, int16_t velocity);
+void setTorque(uint8_t servo_id, int16_t torque);
 
-// void USART6_IRQHandler(void);
-// void USART1_IRQHandler(void);
+bool checkResponse(uint8_t servo_id);
 
 #endif
