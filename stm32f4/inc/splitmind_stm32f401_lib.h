@@ -62,7 +62,7 @@ typedef struct SoftTimer_ms
 {
    unsigned long delay;
    unsigned long start_time;
-}SoftTimer_ms;
+} SoftTimer_ms;
 
 //--------------------------------------------
 
@@ -108,9 +108,9 @@ void SysTick_Handler(void);
 //END OF TIMERS-------------------------------------------------------------------------------
 
 //UART----------------------------------------------------------------------------------------
-void usartInit(void);
-void usartHalfDuplexInit(void);
-void usartHalfDuplexInit1(void);
+void usartInit2(void);
+void usartHalfDuplexInit6(void);  //USART 6
+void usartHalfDuplexInit1(void);  //USART 1
 void sendByteln(char c);
 void sendByte(uint8_t byte);
 void sendByteArray(uint8_t* p, uint8_t length);

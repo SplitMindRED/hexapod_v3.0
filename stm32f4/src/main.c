@@ -12,10 +12,9 @@ void init()
    systemTimeInit();
 
    // usartInit();
-
-   // usartHalfDuplexInit();
-
+   usartHalfDuplexInit6();
    usartHalfDuplexInit1();
+   usartInit2();
 
    //enable all interruptions
    __enable_irq();
@@ -84,7 +83,7 @@ void testMove(uint16_t pause)
    setEndless(2, 1);
    turn(2, 100);
    delayms(pause);
-   turn(1, 250);
+   // turn(1, 250);
    turn(2, 250 + 1024);
    delayms(pause);
 }
@@ -96,23 +95,87 @@ int main(void)
    // pingServo(1);
    // delayms(100);
 
+   // pingServo(1);
+   // delayms(100);
+
    // changeID(2);
 
    // jointMode(2);
    // setEndless(1, 1);
 
-   setEndless(2, 1);
-   turn(2, 100);
+   // setEndless(2, 1);
+   // turn(2, 100);
 
    double angle_to_hex = 1024.0 / 300.0;
    double start_angle = 150 * angle_to_hex;
    uint32_t pause = 1000;
 
+   // testMove(500);
+
+   // delayms(100);
+
+   USART_SendData(USART2, 'a');
+
+   while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET)
+   {
+
+   }
+
+   USART_SendData(USART2, '\n');
+
+   while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET)
+   {
+
+   }
+
+   USART_SendData(USART2, 'b');
+
+   while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET)
+   {
+
+   }
+
+   USART_SendData(USART2, '\n');
+
+   while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET)
+   {
+
+   }
+
+
+   USART_SendData(USART6, 'a');
+
+   while (USART_GetFlagStatus(USART6, USART_FLAG_TC) == RESET)
+   {
+
+   }
+
+   USART_SendData(USART6, '\n');
+
+   while (USART_GetFlagStatus(USART6, USART_FLAG_TC) == RESET)
+   {
+
+   }
+
+   // USART_SendData(USART6, 'b');
+
+   // while (USART_GetFlagStatus(USART6, USART_FLAG_TC) == RESET)
+   // {
+
+   // }
+
+   // USART_SendData(USART6, '\n');
+
+   // while (USART_GetFlagStatus(USART6, USART_FLAG_TC) == RESET)
+   // {
+
+   // }
+
    while (1)
    {
       // testButton();
 
-      testMove(500);
+      // testMove(500);
 
       // jointMode(2);
       // delayms(100);

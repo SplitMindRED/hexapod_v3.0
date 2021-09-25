@@ -6,5 +6,9 @@ stm32f4/*.Maxim
 stm32f4/*.uvoptx
 stm32f4/EventRecorderStub.scvd
 Logo
+stm32f4_hal/Drivers
+stm32f4_hal/MDK-ARM
+stm32f4_hal/Drivers
 Compass/*.cdw.bak
 *.html
+*.lnk

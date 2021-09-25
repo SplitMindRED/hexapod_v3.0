@@ -32,11 +32,11 @@ void digitalWrite(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, bool value)
 {
 	if (value == 1)
 	{
-		GPIO_SetBits(GPIOx, GPIO_Pin_5); // Set pin to Low level ("0")
+		GPIO_SetBits(GPIOx, GPIO_Pin); // Set pin to High level ("1")
 	}
 	else if (value == 0)
 	{
-		GPIO_ResetBits(GPIOx, GPIO_Pin_5); // Set pin to Low level ("0")
+		GPIO_ResetBits(GPIOx, GPIO_Pin); // Set pin to Low level ("0")
 	}
 }
 
@@ -74,8 +74,8 @@ void changeCoreFrequency()
 
 bool delayms(uint32_t millisec)
 {
-	uint32_t a = SYSTICKFREQ / 1000;
-	uint32_t d = millisec * (SYSTICKFREQ / 1000);
+	// uint32_t a = SYSTICKFREQ / 1000;
+	// uint32_t d = millisec * (SYSTICKFREQ / 1000);
 	unsigned long next_time = system_time + millisec * (SYSTICKFREQ / 1000);
 
 	while (system_time <= next_time)
@@ -611,63 +611,65 @@ void SysTick_Handler(void)
 //END OF TIMERS------------------------------------------------------------------------------------------
 
 //UART----------------------------------------------------------------------------------------
-void usartInit()
+void usartInit2()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	/* Initialize USART6*/
-	// enable the USART6 clock
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
+	/* Initialize USART2*/
+	// enable the USART2 clock
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
-	/* Configure USART6 Tx (PA.11) as alternate function push-pull */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+	/* Configure USART2 Tx (PA.02) as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	// GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	/* Configure USART6 Rx (PA.12) as input floating */ //or input with pull-up/-down
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-	//   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+	/* Configure USART2 Rx (PA.03) as input floating */ //or input with pull-up/-down
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	//  GPIO_InitStructure.GPIO_OType = GPIO_OType;
-	// GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	// connect the output pin to the peripheral's alt function
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_USART6);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_USART6);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
 
-	USART_InitStructure.USART_BaudRate = 1000000;
+	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
-	USART_Init(USART6, &USART_InitStructure);
+	USART_Init(USART2, &USART_InitStructure);
 
-	// configure the USART6 interrupt
-	NVIC_InitStructure.NVIC_IRQChannel = USART6_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+	// USART2->BRR = 0x16c;
 
-	// NVIC_EnableIRQ(USART6_IRQn);
+	// configure the USART2 interrupt
+	// NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	// NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	// NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	// NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	// NVIC_Init(&NVIC_InitStructure);
 
-	// enable the USART6 receive interrupt
-	USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+	// NVIC_EnableIRQ(USART2_IRQn);
 
-	/* Enable USART6 */
-	USART_Cmd(USART6, ENABLE);
+	// enable the USART2 receive interrupt
+	// USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+
+	/* Enable USART2 */
+	USART_Cmd(USART2, ENABLE);
 }
 
-void usartHalfDuplexInit()
+void usartHalfDuplexInit6()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
@@ -683,8 +685,8 @@ void usartHalfDuplexInit()
 	// Configure USART6 Tx (PA.11)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	// GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	// GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -693,7 +695,8 @@ void usartHalfDuplexInit()
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource11, GPIO_AF_USART6);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_USART6);
 
-	USART_InitStructure.USART_BaudRate = 1000000;
+	// USART_InitStructure.USART_BaudRate = 1000000;
+	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -753,6 +756,7 @@ void usartHalfDuplexInit1()
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
 
 	USART_InitStructure.USART_BaudRate = 1000000;
+	// USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;

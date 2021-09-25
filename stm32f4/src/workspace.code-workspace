@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"splitmind_stm32f103_lib.h": "c",
+			"stm32f4xx_rcc.h": "c",
+			"stm32f4xx_gpio.h": "c",
+			"stm32f4xx.h": "c",
+			"splitmind_stm32f401_lib.h": "c"
+		}
+	}
+}

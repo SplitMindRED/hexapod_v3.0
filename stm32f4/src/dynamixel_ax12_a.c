@@ -309,7 +309,7 @@ void setEndless(unsigned char ID, bool status)
 	packet[4] = AX_WRITE_DATA;
 	packet[5] = AX_CCW_ANGLE_LIMIT_L;
 	packet[6] = 0; 						// full rotation
-	packet[7] = 0;						// full rotation
+	packet[7] = 0;						   // full rotation
 	packet[8] = Checksum;
 
 	// packet[0] = 0xFF;
@@ -324,7 +324,6 @@ void setEndless(unsigned char ID, bool status)
 
 	// sendByteArray(packet, length);
 	sendByteArray1(packet, length);
-
 }
 
 void clearServoReceiveBuffer(void)
