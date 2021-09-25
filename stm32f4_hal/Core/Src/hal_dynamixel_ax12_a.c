@@ -175,7 +175,7 @@ void wheelMode(uint8_t servo_id, bool status)
 // 	}
 // }
 
-int16_t getPosition(uint8_t servo_id)
+int16_t getAngle(uint8_t servo_id)
 {
    unsigned char packet[8];
    unsigned char checksum = 0;
@@ -204,7 +204,7 @@ int16_t getPosition(uint8_t servo_id)
 
    if (HAL_UART_Receive(UART1, answer, 9, HAL_MAX_DELAY) != HAL_OK)
    {
-      return;
+      return -1;
    }
 
    response.id = answer[3];
@@ -263,25 +263,25 @@ void jointMode(uint8_t id)
    HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
 }
 
-// void setAngle(uint8_t id, uint16_t angle)
-// {
-// 	const unsigned int length = 9;
-// 	unsigned char packet[length];
-// 	uint8_t angle_l = angle;
-// 	uint8_t angle_h = angle >> 8;
+void setAngle(uint8_t servo_id, uint16_t angle)
+{
+   unsigned char packet[9];
+   uint8_t angle_L = angle;
+   uint8_t angle_H = angle >> 8;
+   unsigned char checksum = 0;
 
-// 	checksum = (~(id + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_GOAL_POSITION_L + angle_l + angle_h));
+   checksum = (~(servo_id + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_GOAL_POSITION_L + angle_L + angle_H));
 
-// 	packet[0] = AX_START;
-// 	packet[1] = AX_START;
-// 	packet[2] = id;
-// 	packet[3] = AX_GOAL_LENGTH;
-// 	packet[4] = AX_WRITE_DATA;
-// 	packet[5] = AX_GOAL_POSITION_L;
-// 	packet[6] = angle_l;
-// 	packet[7] = angle_h;
-// 	packet[8] = checksum;
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = servo_id;
+   packet[3] = AX_GOAL_LENGTH;
+   packet[4] = AX_WRITE_DATA;
+   packet[5] = AX_GOAL_POSITION_L;
+   packet[6] = angle_L;
+   packet[7] = angle_H;
+   packet[8] = checksum;
 
-// 	sendByteArray1(packet, length);
-// }
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
+}
 

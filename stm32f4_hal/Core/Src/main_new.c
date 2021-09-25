@@ -41,25 +41,31 @@ int main()
 {
    setup();
 
+   uint16_t angle = 0;
+
    while (1)
    {
+      jointMode(1);
       pingServo(1);
       pingServo(2);
 
       // HAL_Delay(100);
       // pushButton();
-      testMove(500);
+      // testMove(500);
 
       // unsigned long t1 = 0, t2 = 0;
 
       // t1 = HAL_GetTick();
-      getPosition(2);
+      angle = getAngle(2);
+      setAngle(1, angle);
       // t2 = HAL_GetTick();
 
       // UART_printStr("t: ");
       // UART_printLn(t2 - t1);
 
       // UART_printLn(HAL_GetTick());
+
+      HAL_Delay(50);
    }
 
    return 0;
