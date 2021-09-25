@@ -28,7 +28,7 @@ void testMove(uint16_t pause)
    setEndless(UART1, 2, 1);
    turn(UART1, 2, 100);
    HAL_Delay(pause);
-   turn(UART1, 2, 250 + 1024);
+   // turn(UART1, 2, 100 + 1024);
    HAL_Delay(pause);
 }
 
@@ -53,6 +53,8 @@ int main()
       HAL_Delay(100);
       // pushButton();
       testMove(500);
+
+      getActualPosition(UART1, 2);
       // UART_printLn(HAL_GetTick());
    }
 

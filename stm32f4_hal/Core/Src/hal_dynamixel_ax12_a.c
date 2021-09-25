@@ -12,8 +12,6 @@ volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
 volatile uint8_t *volatile receiveBufferStart = receiveBuffer;
 volatile uint8_t *volatile receiveBufferEnd = receiveBuffer;
 
-ServoResponse response;
-
 uint8_t arr[20];
 
 // void USART6_IRQHandler(void)
@@ -80,62 +78,64 @@ uint8_t arr[20];
 
 bool pingServo(UART_HandleTypeDef *huart, const uint8_t servo_id)
 {
-	unsigned char packet[6];
-	unsigned char checksum;
+   unsigned char packet[6];
+   unsigned char checksum;
 
-	uint8_t answer[20];
+   ServoResponse response;
 
-	for (uint8_t i = 0; i < 20; i++)
-	{
-		answer[i] = 0;
-	}
+   uint8_t answer[20];
 
-	checksum = ~(servo_id + AX_PING_LENGTH + AX_PING);
+   for (uint8_t i = 0; i < 20; i++)
+   {
+      answer[i] = 0;
+   }
 
-	packet[0] = AX_START;
-	packet[1] = AX_START;
-	packet[2] = servo_id;
-	packet[3] = AX_PING_LENGTH;
-	packet[4] = AX_PING;
-	packet[5] = checksum;
+   checksum = ~(servo_id + AX_PING_LENGTH + AX_PING);
 
-	HAL_UART_Transmit(huart, packet, sizeof(packet), HAL_MAX_DELAY);
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = servo_id;
+   packet[3] = AX_PING_LENGTH;
+   packet[4] = AX_PING;
+   packet[5] = checksum;
 
-	if (HAL_UART_Receive(huart, answer, 7, HAL_MAX_DELAY) != HAL_OK)
-	{
-		return false;
-	}
+   HAL_UART_Transmit(huart, packet, sizeof(packet), HAL_MAX_DELAY);
 
-	response.id = answer[3];
-	response.length = answer[4];
-	response.error = answer[5];
+   if (HAL_UART_Receive(huart, answer, 7, HAL_MAX_DELAY) != HAL_OK)
+   {
+      return false;
+   }
 
-	for (uint8_t i = 0; i < (response.length - 2); i++)
-	{
-		response.params[0] = answer[6 + i];
-	}
+   response.id = answer[3];
+   response.length = answer[4];
+   response.error = answer[5];
 
-	response.checksum = answer[6 + (response.length - 2)];
+   for (uint8_t i = 0; i < (response.length - 2); i++)
+   {
+      response.params[0] = answer[6 + i];
+   }
 
-	uint16_t param_sum = 0;
+   response.checksum = answer[6 + (response.length - 2)];
 
-	for (uint8_t i = 0; i < (response.length - 2); i++)
-	{
-		param_sum += response.params[i];
-	}
+   uint16_t param_sum = 0;
 
-	checksum = ~(response.id + response.length + response.error + param_sum);
+   for (uint8_t i = 0; i < (response.length - 2); i++)
+   {
+      param_sum += response.params[i];
+   }
 
-	if ((checksum == response.checksum) && (response.id == servo_id))
-	{
-		UART_printStrLn("Ping SUCCSESS!");
-		return true;
-	}
-	else
-	{
-		UART_printStrLn("Ping FAIL!");
-		return false;
-	}
+   checksum = ~(response.id + response.length + response.error + param_sum);
+
+   if ((checksum == response.checksum) && (response.id == servo_id))
+   {
+      UART_printStrLn("Ping SUCCSESS!");
+      return true;
+   }
+   else
+   {
+      UART_printStrLn("Ping FAIL!");
+      return false;
+   }
 }
 
 // void sendServoCommand(const uint8_t servo_id, const ServoCommand commandByte, const uint8_t numParams, const uint8_t* params)
@@ -289,66 +289,66 @@ bool pingServo(UART_HandleTypeDef *huart, const uint8_t servo_id)
 
 void turn(UART_HandleTypeDef *huart, unsigned char ID, int16_t speed)
 {
-	uint8_t speed_H, speed_L;
-	speed_H = speed >> 8;
-	speed_L = speed;                     // 16 bits - 2 x 8 bits variables
-	unsigned char checksum;
+   uint8_t speed_H, speed_L;
+   speed_H = speed >> 8;
+   speed_L = speed;                     // 16 bits - 2 x 8 bits variables
+   unsigned char checksum;
 
-	unsigned char packet[9];
+   unsigned char packet[9];
 
-	checksum = (~(ID + AX_SPEED_LENGTH + AX_WRITE_DATA + AX_GOAL_SPEED_L + speed_L + speed_H));
+   checksum = (~(ID + AX_SPEED_LENGTH + AX_WRITE_DATA + AX_GOAL_SPEED_L + speed_L + speed_H));
 
-	packet[0] = AX_START;
-	packet[1] = AX_START;
-	packet[2] = ID;
-	packet[3] = AX_SPEED_LENGTH;
-	packet[4] = AX_WRITE_DATA;
-	packet[5] = AX_GOAL_SPEED_L;
-	packet[6] = speed_L;
-	packet[7] = speed_H;
-	packet[8] = checksum;
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = ID;
+   packet[3] = AX_SPEED_LENGTH;
+   packet[4] = AX_WRITE_DATA;
+   packet[5] = AX_GOAL_SPEED_L;
+   packet[6] = speed_L;
+   packet[7] = speed_H;
+   packet[8] = checksum;
 
-	// packet[0] = 0xFF;
-	// packet[1] = 0xFF;
-	// packet[2] = 0x01;
-	// packet[3] = 0x05;
-	// packet[4] = 0x03;
-	// packet[5] = 0x20;
-	// packet[6] = 0x64;
-	// packet[7] = 0x00;
-	// packet[8] = 0x72;
+   // packet[0] = 0xFF;
+   // packet[1] = 0xFF;
+   // packet[2] = 0x01;
+   // packet[3] = 0x05;
+   // packet[4] = 0x03;
+   // packet[5] = 0x20;
+   // packet[6] = 0x64;
+   // packet[7] = 0x00;
+   // packet[8] = 0x72;
 
-	HAL_UART_Transmit(huart, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(huart, packet, sizeof(packet), HAL_MAX_DELAY);
 }
 
 void setEndless(UART_HandleTypeDef *huart, unsigned char ID, bool status)
 {
-	unsigned char packet[9];
-	unsigned char checksum;
+   unsigned char packet[9];
+   unsigned char checksum;
 
-	checksum = (~(ID + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_CCW_ANGLE_LIMIT_L));
+   checksum = (~(ID + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_CCW_ANGLE_LIMIT_L));
 
-	packet[0] = AX_START;
-	packet[1] = AX_START;
-	packet[2] = ID;
-	packet[3] = AX_GOAL_LENGTH;
-	packet[4] = AX_WRITE_DATA;
-	packet[5] = AX_CCW_ANGLE_LIMIT_L;
-	packet[6] = 0; 						// full rotation
-	packet[7] = 0;						   // full rotation
-	packet[8] = checksum;
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = ID;
+   packet[3] = AX_GOAL_LENGTH;
+   packet[4] = AX_WRITE_DATA;
+   packet[5] = AX_CCW_ANGLE_LIMIT_L;
+   packet[6] = 0; 						// full rotation
+   packet[7] = 0;						   // full rotation
+   packet[8] = checksum;
 
-	// packet[0] = 0xFF;
-	// packet[1] = 0xFF;
-	// packet[2] = 0x01;
-	// packet[3] = 0x05;
-	// packet[4] = 0x03;
-	// packet[5] = 0x08;
-	// packet[6] = 0x00;
-	// packet[7] = 0x00;
-	// packet[8] = 0xEE;
+   // packet[0] = 0xFF;
+   // packet[1] = 0xFF;
+   // packet[2] = 0x01;
+   // packet[3] = 0x05;
+   // packet[4] = 0x03;
+   // packet[5] = 0x08;
+   // packet[6] = 0x00;
+   // packet[7] = 0x00;
+   // packet[8] = 0xEE;
 
-	HAL_UART_Transmit(huart, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(huart, packet, sizeof(packet), HAL_MAX_DELAY);
 }
 
 // void clearServoReceiveBuffer(void)
@@ -412,62 +412,73 @@ void setEndless(UART_HandleTypeDef *huart, unsigned char ID, bool status)
 // 	}
 // }
 
-// void getActualPosition(uint8_t id)
-// {
-// 	const unsigned int length = 8;
-// 	unsigned char packet[length];
+void getActualPosition(UART_HandleTypeDef *huart, uint8_t servo_id)
+{
+   unsigned char packet[8];
+   unsigned char checksum = 0;
 
-// 	checksum = (~(id + AX_POS_LENGTH + AX_READ_DATA + AX_PRESENT_POSITION_L + AX_BYTE_READ_POS));
+   ServoResponse response;
 
-// 	packet[0] = AX_START;
-// 	packet[1] = AX_START;
-// 	packet[2] = id;
-// 	packet[3] = AX_POS_LENGTH;
-// 	packet[4] = AX_READ_DATA;
-// 	packet[5] = AX_PRESENT_POSITION_L;
-// 	packet[6] = AX_BYTE_READ_POS;
-// 	packet[7] = checksum;
+   uint8_t answer[20];
 
-// 	sendByteArray(packet, length);
+   for (uint8_t i = 0; i < 20; i++)
+   {
+      answer[i] = 0;
+   }
 
-// 	// delayms(100);
+   checksum = (~(servo_id + AX_POS_LENGTH + AX_READ_DATA + AX_PRESENT_POSITION_L + AX_BYTE_READ_POS));
 
-// 	USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = servo_id;
+   packet[3] = AX_POS_LENGTH;
+   packet[4] = AX_READ_DATA;
+   packet[5] = AX_PRESENT_POSITION_L;
+   packet[6] = AX_BYTE_READ_POS;
+   packet[7] = checksum;
 
-// 	uint8_t retries = 0;
+   HAL_UART_Transmit(huart, packet, sizeof(packet), HAL_MAX_DELAY);
 
-// 	while (getServoBytesAvailable() < 5)
-// 	{
-// 		retries++;
-// 		if (retries > REC_WAIT_MAX_RETRIES)
-// 		{
-// 			USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+   if (HAL_UART_Receive(huart, answer, 9, HAL_MAX_DELAY) != HAL_OK)
+   {
+      return;
+   }
 
-// 			return false;
-// 		}
+   response.id = answer[3];
+   response.length = answer[4];
+   response.error = answer[5];
 
-// 		delayus(REC_WAIT_START_US);
-// 	}
-// 	retries = 0;
+   for (uint8_t i = 0; i < (response.length - 2); i++)
+   {
+      response.params[0 + i] = answer[6 + i];
+   }
 
-// 	getServoByte();  // servo header (two 0xff bytes)
-// 	getServoByte();
+   response.checksum = answer[6 + (response.length - 2)];
 
-// 	response.id = getServoByte();
-// 	response.length = getServoByte();
-// 	response.error = getServoByte();
-// 	response.params[0] = getServoByte();
-// 	response.params[1] = getServoByte();
+   uint16_t param_sum = 0;
 
-// 	USART_ITConfig(USART6, USART_IT_RXNE, DISABLE);
+   for (uint8_t i = 0; i < (response.length - 2); i++)
+   {
+      param_sum += response.params[i];
+   }
 
-// 	// if (!getAndCheckResponse(id))
-// 	// {
-// 	// 	return false;
-// 	// }
+   checksum = ~(response.id + response.length + response.error + param_sum);
 
-// 	// return true;
-// }
+   if ((checksum == response.checksum) && (response.id == servo_id))
+   {
+      // UART_printStrLn("Ping SUCCSESS!");
+      uint16_t pos = response.params[0] | (response.params[1] << 8);
+      UART_printStr("Pos: ");
+      UART_printLn(pos);
+      return;
+   }
+   else
+   {
+      int a = 0;
+      // UART_printStrLn("Ping FAIL!");
+      return;
+   }
+}
 
 // void jointMode(uint8_t id)
 // {
