@@ -13,6 +13,11 @@
 #include "main.h"
 #include "splitmind_f401_hal_lib.h"
 
+#define U1_DEBUG
+
+#define TICK_TO_DEG (float)300 / (float)1024
+#define DEG_TO_TICK (float)1024 / (float)300
+
 #define REC_BUFFER_LEN            32
 #define SERVO_MAX_PARAMS          (REC_BUFFER_LEN - 5)
 
@@ -161,6 +166,7 @@ typedef struct ServoResponse
    uint8_t error;
    uint8_t params[SERVO_MAX_PARAMS];
    uint8_t checksum;
+   int8_t result;
 } ServoResponse;
 
 extern volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
@@ -175,8 +181,8 @@ typedef enum ServoCommand
 } ServoCommand;
 
 // ping a servo, returns true if we get back the expected values
-bool pingServo(uint8_t servo_id);
-bool changeId(uint8_t new_id);
+int8_t pingServo(uint8_t servo_id);
+int8_t changeId(uint8_t new_id);
 
 void jointMode(uint8_t servo_id);
 void wheelMode(uint8_t servo_id, bool status);
@@ -189,6 +195,6 @@ void setAngle(uint8_t servo_id, uint16_t angle);
 void setVelocity(uint8_t servo_id, int16_t velocity);
 void setTorque(uint8_t servo_id, int16_t torque);
 
-bool checkResponse(uint8_t servo_id);
+ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer);
 
 #endif

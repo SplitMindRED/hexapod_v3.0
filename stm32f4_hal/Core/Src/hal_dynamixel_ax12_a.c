@@ -12,12 +12,10 @@ volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
 volatile uint8_t *volatile receiveBufferStart = receiveBuffer;
 volatile uint8_t *volatile receiveBufferEnd = receiveBuffer;
 
-bool pingServo(uint8_t servo_id)
+int8_t pingServo(uint8_t servo_id)
 {
    unsigned char packet[6];
    unsigned char checksum;
-
-   ServoResponse response;
 
    uint8_t answer[20];
 
@@ -39,49 +37,75 @@ bool pingServo(uint8_t servo_id)
 
    if (HAL_UART_Receive(UART1, answer, 7, MAX_DELAY) != HAL_OK)
    {
+#ifdef U1_DEBUG
       UART_printStr("Servo ");
       UART_print(servo_id);
       UART_printStrLn(" recieve ping FAIL!");
+#endif
       turnLed(1);
-      return false;
+      return ERROR;
    }
 
-   response.id = answer[3];
-   response.length = answer[4];
-   response.error = answer[5];
+   ServoResponse response = checkResponse(servo_id, answer);
 
-   for (uint8_t i = 0; i < (response.length - 2); i++)
+   if (response.result == OK)
    {
-      response.params[0] = answer[6 + i];
-   }
-
-   response.checksum = answer[6 + (response.length - 2)];
-
-   uint16_t param_sum = 0;
-
-   for (uint8_t i = 0; i < (response.length - 2); i++)
-   {
-      param_sum += response.params[i];
-   }
-
-   checksum = ~(response.id + response.length + response.error + param_sum);
-
-   if ((checksum == response.checksum) && (response.id == servo_id))
-   {
+#ifdef U1_DEBUG
       UART_printStr("Servo ");
       UART_print(servo_id);
       UART_printStrLn(" ping SUCCSESS!");
+#endif
       turnLed(0);
-      return true;
+      return OK;
    }
    else
    {
+#ifdef U1_DEBUG
       UART_printStr("Servo ");
       UART_print(servo_id);
       UART_printStrLn(" ping FAIL!");
+#endif      
       turnLed(1);
-      return false;
+      return ERROR;
    }
+
+
+   // response.id = answer[3];
+   // response.length = answer[4];
+   // response.error = answer[5];
+
+   // for (uint8_t i = 0; i < (response.length - 2); i++)
+   // {
+   //    response.params[0] = answer[6 + i];
+   // }
+
+   // response.checksum = answer[6 + (response.length - 2)];
+
+   // uint16_t param_sum = 0;
+
+   // for (uint8_t i = 0; i < (response.length - 2); i++)
+   // {
+   //    param_sum += response.params[i];
+   // }
+
+   // checksum = ~(response.id + response.length + response.error + param_sum);
+
+   // if ((checksum == response.checksum) && (response.id == servo_id))
+   // {
+   //    UART_printStr("Servo ");
+   //    UART_print(servo_id);
+   //    UART_printStrLn(" ping SUCCSESS!");
+   //    turnLed(0);
+   //    return true;
+   // }
+   // else
+   // {
+   //    UART_printStr("Servo ");
+   //    UART_print(servo_id);
+   //    UART_printStrLn(" ping FAIL!");
+   //    turnLed(1);
+   //    return false;
+   // }
 }
 
 void setVelocity(uint8_t servo_id, int16_t velocity)
@@ -183,8 +207,6 @@ int16_t getAngle(uint8_t servo_id)
    unsigned char packet[8];
    unsigned char checksum = 0;
 
-   ServoResponse response;
-
    uint8_t answer[20];
 
    for (uint8_t i = 0; i < 20; i++)
@@ -210,36 +232,51 @@ int16_t getAngle(uint8_t servo_id)
       return -1;
    }
 
-   response.id = answer[3];
-   response.length = answer[4];
-   response.error = answer[5];
+   ServoResponse response = checkResponse(servo_id, answer);
 
-   for (uint8_t i = 0; i < (response.length - 2); i++)
-   {
-      response.params[0 + i] = answer[6 + i];
-   }
-
-   response.checksum = answer[6 + (response.length - 2)];
-
-   uint16_t param_sum = 0;
-
-   for (uint8_t i = 0; i < (response.length - 2); i++)
-   {
-      param_sum += response.params[i];
-   }
-
-   checksum = ~(response.id + response.length + response.error + param_sum);
-
-   if ((checksum == response.checksum) && (response.id == servo_id))
+   if (response.result == OK)
    {
       uint16_t pos = response.params[0] | (response.params[1] << 8);
       return pos;
    }
    else
    {
+#ifdef U1_DEBUG
       UART_printStrLn("Read pos FAIL!");
-      return -1;
+#endif
+      return ERROR;
    }
+
+   // response.id = answer[3];
+   // response.length = answer[4];
+   // response.error = answer[5];
+
+   // for (uint8_t i = 0; i < (response.length - 2); i++)
+   // {
+   //    response.params[0 + i] = answer[6 + i];
+   // }
+
+   // response.checksum = answer[6 + (response.length - 2)];
+
+   // uint16_t param_sum = 0;
+
+   // for (uint8_t i = 0; i < (response.length - 2); i++)
+   // {
+   //    param_sum += response.params[i];
+   // }
+
+   // checksum = ~(response.id + response.length + response.error + param_sum);
+
+   // if ((checksum == response.checksum) && (response.id == servo_id))
+   // {
+   //    uint16_t pos = response.params[0] | (response.params[1] << 8);
+   //    return pos;
+   // }
+   // else
+   // {
+   //    UART_printStrLn("Read pos FAIL!");
+   //    return -1;
+   // }
 }
 
 void jointMode(uint8_t id)
@@ -286,3 +323,39 @@ void setAngle(uint8_t servo_id, uint16_t angle)
    HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 }
 
+ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer)
+{
+   ServoResponse response;
+   unsigned char checksum = 0;
+
+   response.id = p_answer[3];
+   response.length = p_answer[4];
+   response.error = p_answer[5];
+
+   for (uint8_t i = 0; i < (response.length - 2); i++)
+   {
+      response.params[0 + i] = p_answer[6 + i];
+   }
+
+   response.checksum = p_answer[6 + (response.length - 2)];
+
+   uint16_t param_sum = 0;
+
+   for (uint8_t i = 0; i < (response.length - 2); i++)
+   {
+      param_sum += response.params[i];
+   }
+
+   checksum = ~(response.id + response.length + response.error + param_sum);
+
+   if ((checksum == response.checksum) && (response.id == servo_id))
+   {
+      response.result = OK;
+   }
+   else
+   {
+      response.result = ERROR;
+   }
+
+   return response;
+}

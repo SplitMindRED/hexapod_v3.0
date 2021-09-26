@@ -12,6 +12,8 @@
 #define UART_DEBUG
 
 #define MAX_DELAY 15
+#define OK        1
+#define ERROR     -1
 
 //UART for debug
 #ifdef UART_DEBUG
