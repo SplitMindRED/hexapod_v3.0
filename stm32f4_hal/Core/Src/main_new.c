@@ -57,7 +57,7 @@ int main()
       // t1 = HAL_GetTick();
       angle = getAngle(2);
       // t2 = HAL_GetTick();
-      if (angle < 0)
+      if (angle == ERROR)
       {
 
       }
