@@ -25,15 +25,15 @@ void pushButton()
 
 void testMove(uint16_t pause)
 {
-   // wheelMode(1, 1);
-   wheelMode(2, 1);
+   wheelMode(1, 1);
+   // wheelMode(2, 1);
 
-   // setVelocity(1, 100);
-   setVelocity(2, 100);
+   setVelocity(1, 100);
+   // setVelocity(2, 100);
 
    HAL_Delay(pause);
-   // setVelocity(1, 100 + 1024);
-   setVelocity(2, 100 + 1024);
+   setVelocity(1, 100 + 1024);
+   // setVelocity(2, 100 + 1024);
    HAL_Delay(pause);
 }
 
@@ -42,14 +42,17 @@ int main()
    setup();
 
    int16_t angle = 0;
-   uint16_t vel = 0;
+   int16_t vel = 0;
    unsigned long t1 = 0, t2 = 0;
    jointMode(1);
+   // vel = getVelocity(1);
+   // wheelMode(1, 1);
+   // setVelocity(1, 100 + 1024);
 
    while (1)
    {
-      pingServo(1);
-      pingServo(2);
+      // pingServo(1);
+      // pingServo(2);
 
       // HAL_Delay(100);
       // pushButton();
@@ -57,7 +60,7 @@ int main()
 
       // t1 = HAL_GetTick();
       angle = getAngle(2);
-      // vel = getVelocity(2);
+      vel = getVelocity(1);
       // t2 = HAL_GetTick();
       if (angle == ERROR)
       {
@@ -68,18 +71,18 @@ int main()
          setAngle(1, (uint16_t)angle);
       }
 
-      // UART_printStr("vel: ");
-      // UART_printDivLn(vel);
+      UART_printStr("vel: ");
+      UART_printDivLn(vel);
 
 
       // UART_printStr("t: ");
       // UART_printLn(t2 - t1);
-      UART_printStr("q: ");
-      UART_printDivLn(angle * (float)300 / (float)1024);
+      // UART_printStr("q: ");
+      // UART_printDivLn(angle * (float)300 / (float)1024);
 
       // UART_printLn(HAL_GetTick());
 
-      // HAL_Delay(50);
+      HAL_Delay(50);
    }
 
    return 0;

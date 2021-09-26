@@ -11,6 +11,8 @@ int8_t initAllDynamixel(void)
 {
    servo[0].id = 1;
    servo[1].id = 2;
+
+   return OK;
 }
 
 int8_t pingServo(uint8_t servo_id)
@@ -132,7 +134,6 @@ int8_t wheelMode(uint8_t servo_id, bool status)
    // packet[7] = 0x00;
    // packet[8] = 0xEE;
 
-   // HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
    if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) == HAL_OK)
    {
       servo[servo_id].mode = WHEEL_MODE;
@@ -156,7 +157,7 @@ int16_t getAngle(uint8_t servo_id)
       answer[i] = 0;
    }
 
-   checksum = (~(servo_id + AX_POS_LENGTH + AX_READ_DATA + AX_PRESENT_POSITION_L + AX_BYTE_READ_POS));
+   checksum = (~(servo_id + AX_POS_LENGTH + AX_READ_DATA + AX_PRESENT_POSITION_L + AX_BYTE_READ));
 
    packet[0] = AX_START;
    packet[1] = AX_START;
@@ -164,14 +165,20 @@ int16_t getAngle(uint8_t servo_id)
    packet[3] = AX_POS_LENGTH;
    packet[4] = AX_READ_DATA;
    packet[5] = AX_PRESENT_POSITION_L;
-   packet[6] = AX_BYTE_READ_POS;
+   packet[6] = AX_BYTE_READ;
    packet[7] = checksum;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+   // HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+   if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != HAL_OK)
+   {
+      UART_printStrLn("Read pos transmit FAIL!");
+      // return ERROR;
+   }
 
    if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
    {
-      return ERROR;
+      UART_printStrLn("Recieve answer pos FAIL!");
+      // return ERROR;
    }
 
    ServoResponse response = checkResponse(servo_id, answer);
@@ -292,32 +299,33 @@ int16_t getVelocity(uint8_t servo_id)
       answer[i] = 0;
    }
 
-   checksum = (~(servo_id + AX_POS_LENGTH + AX_READ_DATA + AX_PRESENT_POSITION_L + AX_BYTE_READ_POS));
+   checksum = (~(servo_id + 4 + AX_READ_DATA + AX_PRESENT_SPEED_L + AX_BYTE_READ));
 
    packet[0] = AX_START;
    packet[1] = AX_START;
    packet[2] = servo_id;
-   packet[3] = AX_SPEED_LENGTH;
+   packet[3] = AX_SPEED_LENGTH_READ;
    packet[4] = AX_READ_DATA;
    packet[5] = AX_PRESENT_SPEED_L;
-   packet[6] = 2;
+   packet[6] = AX_BYTE_READ;
    packet[7] = checksum;
 
    if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != OK)
    {
-      return ERROR;
+      int af = 0;
+      // return ERROR;
    }
 
    if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
    {
-      return ERROR;
+      // return ERROR;
    }
 
    ServoResponse response = checkResponse(servo_id, answer);
 
    if (response.result == OK)
    {
-      uint16_t vel = response.params[0] | (response.params[1] << 8);
+      int16_t vel = response.params[0] | (response.params[1] << 8);
       servo[servo_id].velocity = vel;
 
       if ((vel & 1 << 10))

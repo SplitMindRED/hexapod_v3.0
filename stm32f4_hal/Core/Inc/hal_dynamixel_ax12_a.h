@@ -118,12 +118,13 @@
 #define ON                          1
 #define LEFT						      0
 #define RIGHT                       1
-#define AX_BYTE_READ                1
-#define AX_BYTE_READ_POS            2
+// #define AX_BYTE_READ                1
+#define AX_BYTE_READ                2
 #define AX_PING_LENGTH				   2
 #define AX_RESET_LENGTH				   2
 #define AX_ACTION_LENGTH			   2
 #define AX_ID_LENGTH                4
+#define AX_SPEED_LENGTH_READ        4
 #define AX_LR_LENGTH                4
 #define AX_SRL_LENGTH               4
 #define AX_RDT_LENGTH               4
