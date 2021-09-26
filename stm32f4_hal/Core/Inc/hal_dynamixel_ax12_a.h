@@ -191,7 +191,7 @@ int8_t wheelMode(uint8_t servo_id, bool status);
 
 int16_t getAngle(uint8_t servo_id);
 int16_t getVelocity(uint8_t servo_id);
-void getTorque(uint8_t servo_id);
+int16_t getTorque(uint8_t servo_id);
 
 void setAngle(uint8_t servo_id, uint16_t angle);
 void setVelocity(uint8_t servo_id, int16_t velocity);
