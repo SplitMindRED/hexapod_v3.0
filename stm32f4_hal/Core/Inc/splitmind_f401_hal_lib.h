@@ -11,6 +11,8 @@
 
 #define UART_DEBUG
 
+#define MAX_DELAY 15
+
 //UART for debug
 #ifdef UART_DEBUG
 #define UDBG &huart2
@@ -29,6 +31,8 @@ typedef struct SoftTimer_ms
 }SoftTimer_ms;
 
 bool checkTimer(SoftTimer_ms *timer);
+
+void turnLed(bool status);
 
 /*
   ******************************************************************************

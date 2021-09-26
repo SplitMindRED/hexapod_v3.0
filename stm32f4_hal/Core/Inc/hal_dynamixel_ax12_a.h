@@ -181,7 +181,7 @@ bool changeId(uint8_t new_id);
 void jointMode(uint8_t servo_id);
 void wheelMode(uint8_t servo_id, bool status);
 
-int16_t getPosition(uint8_t servo_id);
+int16_t getAngle(uint8_t servo_id);
 void getVelocity(uint8_t servo_id);
 void getTorque(uint8_t servo_id);
 

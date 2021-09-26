@@ -35,13 +35,14 @@ bool pingServo(uint8_t servo_id)
    packet[4] = AX_PING;
    packet[5] = checksum;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 
-   if (HAL_UART_Receive(UART1, answer, 7, 10) != HAL_OK)
+   if (HAL_UART_Receive(UART1, answer, 7, MAX_DELAY) != HAL_OK)
    {
       UART_printStr("Servo ");
       UART_print(servo_id);
-      UART_printStrLn(" ping FAIL!");
+      UART_printStrLn(" recieve ping FAIL!");
+      turnLed(1);
       return false;
    }
 
@@ -70,6 +71,7 @@ bool pingServo(uint8_t servo_id)
       UART_printStr("Servo ");
       UART_print(servo_id);
       UART_printStrLn(" ping SUCCSESS!");
+      turnLed(0);
       return true;
    }
    else
@@ -77,6 +79,7 @@ bool pingServo(uint8_t servo_id)
       UART_printStr("Servo ");
       UART_print(servo_id);
       UART_printStrLn(" ping FAIL!");
+      turnLed(1);
       return false;
    }
 }
@@ -112,7 +115,7 @@ void setVelocity(uint8_t servo_id, int16_t velocity)
    // packet[7] = 0x00;
    // packet[8] = 0x72;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 }
 
 void wheelMode(uint8_t servo_id, bool status)
@@ -142,7 +145,7 @@ void wheelMode(uint8_t servo_id, bool status)
    // packet[7] = 0x00;
    // packet[8] = 0xEE;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 }
 
 // bool changeID(uint8_t new_id)
@@ -200,9 +203,9 @@ int16_t getAngle(uint8_t servo_id)
    packet[6] = AX_BYTE_READ_POS;
    packet[7] = checksum;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 
-   if (HAL_UART_Receive(UART1, answer, 9, HAL_MAX_DELAY) != HAL_OK)
+   if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
    {
       return -1;
    }
@@ -230,8 +233,6 @@ int16_t getAngle(uint8_t servo_id)
    if ((checksum == response.checksum) && (response.id == servo_id))
    {
       uint16_t pos = response.params[0] | (response.params[1] << 8);
-      UART_printStr("Pos: ");
-      UART_printLn(pos);
       return pos;
    }
    else
@@ -260,7 +261,7 @@ void jointMode(uint8_t id)
    packet[7] = limit_H;
    packet[8] = checksum;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 }
 
 void setAngle(uint8_t servo_id, uint16_t angle)
@@ -282,6 +283,6 @@ void setAngle(uint8_t servo_id, uint16_t angle)
    packet[7] = angle_H;
    packet[8] = checksum;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), HAL_MAX_DELAY);
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 }
 
