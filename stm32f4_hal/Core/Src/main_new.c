@@ -43,6 +43,7 @@ int main()
 
    int16_t angle = 0;
    int16_t vel = 0;
+   int8_t TE = 0;
    int16_t torque = 0;
 
    unsigned long t1 = 0, t2 = 0;
@@ -64,6 +65,8 @@ int main()
       angle = getAngle(2);
       vel = getVelocity(1);
       torque = getTorque(1);
+      TE = getTorqueEnable(1);
+      // disableTorque(1);
       // t2 = HAL_GetTick();
       if (angle == ERROR)
       {
@@ -76,6 +79,10 @@ int main()
 
       UART_printStr("vel: ");
       UART_printDivLn(vel);
+
+      UART_printStr("TE: ");
+      UART_printDivLn(TE);
+
 
       UART_printStr("torque: ");
       UART_printDivLn(torque);

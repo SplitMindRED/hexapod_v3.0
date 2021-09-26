@@ -233,7 +233,7 @@ int16_t getVelocity(uint8_t servo_id)
 #ifdef U1_DEBUG
       UART_printStrLn("Read vel transmit FAIL!");
 #endif
-      turnLed(1);
+      // turnLed(1);
 
       // return ERROR;
    }
@@ -243,7 +243,7 @@ int16_t getVelocity(uint8_t servo_id)
 #ifdef U1_DEBUG
       UART_printStrLn("Read vel recieve answer FAIL!");
 #endif
-      turnLed(1);
+      // turnLed(1);
 
       // return ERROR;
    }
@@ -414,12 +414,12 @@ int8_t getTorqueEnable(uint8_t servo_id)
       answer[i] = 0;
    }
 
-   checksum = (~(servo_id + AX_POS_LENGTH + AX_READ_DATA + AX_TORQUE_ENABLE + AX_BYTE_READ));
+   checksum = (~(servo_id + 4 + AX_READ_DATA + AX_TORQUE_ENABLE + AX_BYTE_READ));
 
    packet[0] = AX_START;
    packet[1] = AX_START;
    packet[2] = servo_id;
-   packet[3] = AX_POS_LENGTH;
+   packet[3] = 4;
    packet[4] = AX_READ_DATA;
    packet[5] = AX_TORQUE_ENABLE;
    packet[6] = AX_BYTE_READ;
@@ -428,7 +428,7 @@ int8_t getTorqueEnable(uint8_t servo_id)
    if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != HAL_OK)
    {
 #ifdef U1_DEBUG
-      UART_printStrLn("Read pos transmit FAIL!");
+      UART_printStrLn("Read torque enable transmit FAIL!");
 #endif
       turnLed(1);
 
@@ -438,7 +438,7 @@ int8_t getTorqueEnable(uint8_t servo_id)
    if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
    {
 #ifdef U1_DEBUG
-      UART_printStrLn("Read pos recieve answer FAIL!");
+      UART_printStrLn("Read torque enable recieve answer FAIL!");
 #endif
       turnLed(1);
 
@@ -449,19 +449,76 @@ int8_t getTorqueEnable(uint8_t servo_id)
 
    if (response.result == OK)
    {
-      uint16_t pos = response.params[0] | (response.params[1] << 8);
-      servo[servo_id].angle = pos;
-      return pos;
+      int8_t torque_enable = response.params[0];
+      return torque_enable;
    }
    else
    {
 #ifdef U1_DEBUG
-      UART_printStrLn("Read pos FAIL!");
+      UART_printStrLn("Read torque enable FAIL!");
 #endif
       return ERROR;
    }
 }
 
+int8_t disableTorque(uint8_t servo_id)
+{
+   unsigned char packet[8];
+   unsigned char checksum = 0;
+
+   uint8_t answer[20];
+
+   for (uint8_t i = 0; i < 20; i++)
+   {
+      answer[i] = 0;
+   }
+
+   checksum = (~(servo_id + 4 + AX_WRITE_DATA + AX_TORQUE_ENABLE));
+
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = servo_id;
+   packet[3] = 4;
+   packet[4] = AX_WRITE_DATA;
+   packet[5] = AX_TORQUE_ENABLE;
+   packet[6] = 0;
+   packet[7] = checksum;
+
+   if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != HAL_OK)
+   {
+#ifdef U1_DEBUG
+      UART_printStrLn("Torque disable transmit FAIL!");
+#endif
+      turnLed(1);
+
+      // return ERROR;
+   }
+
+   if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
+   {
+#ifdef U1_DEBUG
+      UART_printStrLn("Torque disable recieve answer FAIL!");
+#endif
+      turnLed(1);
+
+      // return ERROR;
+   }
+
+   ServoResponse response = checkResponse(servo_id, answer);
+
+   if (response.result == OK)
+   {
+      // int8_t torque_enable = response.params[0];
+      return OK;
+   }
+   else
+   {
+#ifdef U1_DEBUG
+      UART_printStrLn("Torque disable FAIL!");
+#endif
+      return ERROR;
+   }
+}
 
 ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer)
 {

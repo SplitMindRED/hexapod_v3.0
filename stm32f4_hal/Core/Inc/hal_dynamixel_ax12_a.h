@@ -205,6 +205,7 @@ void setVelocity(uint8_t servo_id, int16_t velocity);
 void setTorque(uint8_t servo_id, int16_t torque);
 
 int8_t getTorqueEnable(uint8_t servo_id);
+int8_t disableTorque(uint8_t servo_id);
 
 ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer);
 
