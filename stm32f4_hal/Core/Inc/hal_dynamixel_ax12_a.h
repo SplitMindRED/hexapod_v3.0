@@ -118,13 +118,13 @@
 #define ON                          1
 #define LEFT						      0
 #define RIGHT                       1
-// #define AX_BYTE_READ                1
-#define AX_BYTE_READ                2
+#define AX_BYTE_READ                1
+#define AX_2_BYTE_READ              2
 #define AX_PING_LENGTH				   2
 #define AX_RESET_LENGTH				   2
 #define AX_ACTION_LENGTH			   2
 #define AX_ID_LENGTH                4
-#define AX_SPEED_LENGTH_READ        4
+// #define AX_SPEED_LENGTH_R           4
 #define AX_LR_LENGTH                4
 #define AX_SRL_LENGTH               4
 #define AX_RDT_LENGTH               4
@@ -141,7 +141,7 @@
 #define AX_RWS_LENGTH               4
 #define AX_VOLT_LENGTH              4
 #define AX_LED_LENGTH               4
-#define AX_TORQUE_LENGTH            4
+// #define AX_TORQUE_LENGTH_R          4
 #define AX_POS_LENGTH               4
 #define AX_GOAL_LENGTH              5
 #define AX_MT_LENGTH                5
@@ -157,6 +157,13 @@
 #define TX_MODE                     1
 #define RX_MODE                     0
 #define LOCK                        1
+
+// Read instruction length ///////////////////////////////////////////////////////////////
+#define AX_TORQUE_LENGTH_R          4
+#define AX_SPEED_LENGTH_R           4
+
+// Write instruction length ///////////////////////////////////////////////////////////////
+
 
 extern unsigned long delta;
 
@@ -196,6 +203,8 @@ int16_t getTorque(uint8_t servo_id);
 void setAngle(uint8_t servo_id, uint16_t angle);
 void setVelocity(uint8_t servo_id, int16_t velocity);
 void setTorque(uint8_t servo_id, int16_t torque);
+
+int8_t getTorqueEnable(uint8_t servo_id);
 
 ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer);
 

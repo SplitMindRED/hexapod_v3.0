@@ -74,16 +74,16 @@ int main()
          setAngle(1, (uint16_t)angle);
       }
 
-      // UART_printStr("vel: ");
-      // UART_printDivLn(vel);
+      UART_printStr("vel: ");
+      UART_printDivLn(vel);
 
       UART_printStr("torque: ");
       UART_printDivLn(torque);
 
       // UART_printStr("t: ");
       // UART_printLn(t2 - t1);
-      // UART_printStr("q: ");
-      // UART_printDivLn(angle * (float)300 / (float)1024);
+      UART_printStr("q: ");
+      UART_printDivLn(angle * (float)300 / (float)1024);
 
       // UART_printLn(HAL_GetTick());
 
