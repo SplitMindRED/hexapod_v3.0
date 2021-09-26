@@ -42,6 +42,7 @@ int main()
    setup();
 
    int16_t angle = 0;
+   uint16_t vel = 0;
    unsigned long t1 = 0, t2 = 0;
    jointMode(1);
 
@@ -56,8 +57,9 @@ int main()
 
       // t1 = HAL_GetTick();
       angle = getAngle(2);
+      // vel = getVelocity(2);
       // t2 = HAL_GetTick();
-      if (angle < 0)
+      if (angle == ERROR)
       {
 
       }
@@ -65,6 +67,10 @@ int main()
       {
          setAngle(1, (uint16_t)angle);
       }
+
+      // UART_printStr("vel: ");
+      // UART_printDivLn(vel);
+
 
       // UART_printStr("t: ");
       // UART_printLn(t2 - t1);

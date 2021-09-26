@@ -18,6 +18,9 @@
 #define TICK_TO_DEG (float)300 / (float)1024
 #define DEG_TO_TICK (float)1024 / (float)300
 
+#define JOINT_MODE   1
+#define WHEEL_MODE   2
+
 #define REC_BUFFER_LEN            32
 #define SERVO_MAX_PARAMS          (REC_BUFFER_LEN - 5)
 
@@ -156,9 +159,6 @@
 
 extern unsigned long delta;
 
-extern uint8_t servoErrorCode;
-extern bool flag;
-
 typedef struct ServoResponse
 {
    uint8_t id;
@@ -169,32 +169,39 @@ typedef struct ServoResponse
    int8_t result;
 } ServoResponse;
 
-extern volatile uint8_t receiveBuffer[REC_BUFFER_LEN];
-extern volatile uint8_t *volatile receiveBufferStart;
-extern volatile uint8_t *volatile receiveBufferEnd;
-
-typedef enum ServoCommand
+typedef struct Servo
 {
-   PING = 1,
-   READ = 2,
-   WRITE = 3
-} ServoCommand;
+   uint8_t id;
+   uint8_t mode;
+   uint16_t velocity;
+   uint16_t angle;
+   uint16_t torque;
+   bool is_moving;
+} Servo;
+
+int8_t initAllDynamixel(void);
 
 // ping a servo, returns true if we get back the expected values
 int8_t pingServo(uint8_t servo_id);
 int8_t changeId(uint8_t new_id);
 
-void jointMode(uint8_t servo_id);
-void wheelMode(uint8_t servo_id, bool status);
+//servo mode
+int8_t jointMode(uint8_t servo_id);
 
+//endless movement
+int8_t wheelMode(uint8_t servo_id, bool status);
+
+//gets current absolute position from 0 to 1023 (0 - 300 deg)
 int16_t getAngle(uint8_t servo_id);
-void getVelocity(uint8_t servo_id);
+int16_t getVelocity(uint8_t servo_id);
 void getTorque(uint8_t servo_id);
 
+//set absolute position from 0 to 1023 (0 - 300 deg) 
 void setAngle(uint8_t servo_id, uint16_t angle);
 void setVelocity(uint8_t servo_id, int16_t velocity);
 void setTorque(uint8_t servo_id, int16_t torque);
 
+//parse answer and check checksum and servo id, returns struct with params
 ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer);
 
 #endif
