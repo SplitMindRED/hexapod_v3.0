@@ -141,6 +141,10 @@ int8_t wheelMode(uint8_t servo_id, bool status)
    }
    else
    {
+#ifdef U1_DEBUG
+      UART_printStrLn("Set wheel mode transmit FAIL!");
+#endif
+      turnLed(1);
       return ERROR;
    }
 }
@@ -168,16 +172,23 @@ int16_t getAngle(uint8_t servo_id)
    packet[6] = AX_BYTE_READ;
    packet[7] = checksum;
 
-   // HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
    if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != HAL_OK)
    {
+#ifdef U1_DEBUG
       UART_printStrLn("Read pos transmit FAIL!");
+#endif
+      turnLed(1);
+
       // return ERROR;
    }
 
    if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
    {
-      UART_printStrLn("Recieve answer pos FAIL!");
+#ifdef U1_DEBUG
+      UART_printStrLn("Read pos recieve answer FAIL!");
+#endif
+      turnLed(1);
+
       // return ERROR;
    }
 
@@ -312,12 +323,17 @@ int16_t getVelocity(uint8_t servo_id)
 
    if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != OK)
    {
-      int af = 0;
+#ifdef U1_DEBUG
+      UART_printStrLn("Read vel transmit FAIL!");
+#endif
       // return ERROR;
    }
 
    if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
    {
+#ifdef U1_DEBUG
+      UART_printStrLn("Read vel recieve answer FAIL!");
+#endif
       // return ERROR;
    }
 

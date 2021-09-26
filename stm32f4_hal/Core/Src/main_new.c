@@ -51,8 +51,8 @@ int main()
 
    while (1)
    {
-      // pingServo(1);
-      // pingServo(2);
+      pingServo(1);
+      pingServo(2);
 
       // HAL_Delay(100);
       // pushButton();
@@ -77,8 +77,8 @@ int main()
 
       // UART_printStr("t: ");
       // UART_printLn(t2 - t1);
-      // UART_printStr("q: ");
-      // UART_printDivLn(angle * (float)300 / (float)1024);
+      UART_printStr("q: ");
+      UART_printDivLn(angle * (float)300 / (float)1024);
 
       // UART_printLn(HAL_GetTick());
 

@@ -16,7 +16,7 @@
 #define JOINT_MODE   1
 #define WHEEL_MODE   2
 
-#define U1_DEBUG
+// #define U1_DEBUG
 
 #define TICK_TO_DEG (float)300 / (float)1024
 #define DEG_TO_TICK (float)1024 / (float)300
