@@ -94,7 +94,7 @@ int8_t jointMode(uint8_t servo_id)
 
    if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) == HAL_OK)
    {
-      servo[servo_id].mode = JOINT_MODE;
+      // servo[servo_id].mode = JOINT_MODE;
       return OK;
    }
    else
@@ -132,7 +132,7 @@ int8_t wheelMode(uint8_t servo_id, bool status)
 
    if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) == HAL_OK)
    {
-      servo[servo_id].mode = WHEEL_MODE;
+      // servo[servo_id].mode = WHEEL_MODE;
       return OK;
    }
    else
@@ -193,7 +193,7 @@ int16_t getAngle(uint8_t servo_id)
    if (response.result == OK)
    {
       uint16_t pos = response.params[0] | (response.params[1] << 8);
-      servo[servo_id].angle = pos;
+      // servo[servo_id].angle = pos;
       return pos;
    }
    else
@@ -228,22 +228,27 @@ int16_t getVelocity(uint8_t servo_id)
    packet[6] = AX_2_BYTE_READ;
    packet[7] = checksum;
 
-   if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != OK)
+   uint8_t rec = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+
+   // if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) != OK)
+   if (rec != HAL_OK)
    {
 #ifdef U1_DEBUG
       UART_printStrLn("Read vel transmit FAIL!");
 #endif
-      // turnLed(1);
+      turnLed(1);
 
       // return ERROR;
    }
 
-   if (HAL_UART_Receive(UART1, answer, 9, MAX_DELAY) != HAL_OK)
+   rec = HAL_UART_Receive(UART1, answer, 9, MAX_DELAY);
+
+   if (rec != HAL_OK)
    {
 #ifdef U1_DEBUG
       UART_printStrLn("Read vel recieve answer FAIL!");
 #endif
-      // turnLed(1);
+      turnLed(1);
 
       // return ERROR;
    }
@@ -253,7 +258,7 @@ int16_t getVelocity(uint8_t servo_id)
    if (response.result == OK)
    {
       int16_t vel = response.params[0] | (response.params[1] << 8);
-      servo[servo_id].velocity = vel;
+      // servo[servo_id].velocity = vel;
 
       if ((vel & 1 << 10))
       {
@@ -270,6 +275,9 @@ int16_t getVelocity(uint8_t servo_id)
       UART_print(servo_id);
       UART_printStrLn(" read velocity FAIL!");
 #endif
+
+      turnLed(1);
+
       return ERROR;
    }
 }
@@ -322,7 +330,7 @@ int16_t getTorque(uint8_t servo_id)
    if (response.result == OK)
    {
       int16_t torque = response.params[0] | (response.params[1] << 8);
-      servo[servo_id].torque = torque;
+      // servo[servo_id].torque = torque;
 
       if ((torque & 1 << 10))
       {
@@ -557,32 +565,32 @@ ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer)
    return response;
 }
 
-// bool changeID(uint8_t new_id)
-// {
-// 	const unsigned int length = 8;
-// 	unsigned char packet[length];
+int8_t changeId(uint8_t new_id)
+{
+   unsigned char packet[8];
+   unsigned char checksum = 0;
 
-// 	checksum = (~(BROADCAST_ID + AX_ID_LENGTH + AX_WRITE_DATA + AX_ID + new_id));
+   checksum = (~(BROADCAST_ID + AX_ID_LENGTH + AX_WRITE_DATA + AX_ID + new_id));
 
-// 	packet[0] = AX_START;
-// 	packet[1] = AX_START;
-// 	packet[2] = BROADCAST_ID;
-// 	packet[3] = AX_ID_LENGTH;
-// 	packet[4] = AX_WRITE_DATA;
-// 	packet[5] = AX_ID;
-// 	packet[6] = new_id;
-// 	packet[7] = checksum;
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = BROADCAST_ID;
+   packet[3] = AX_ID_LENGTH;
+   packet[4] = AX_WRITE_DATA;
+   packet[5] = AX_ID;
+   packet[6] = new_id;
+   packet[7] = checksum;
 
-// 	sendByteArray(packet, length);
+   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
 
-// 	delayms(100);
+   HAL_Delay(100);
 
-// 	if (pingServo(new_id))
-// 	{
-// 		return true;
-// 	}
-// 	else
-// 	{
-// 		return false;
-// 	}
-// }
+   if (pingServo(new_id))
+   {
+      return OK;
+   }
+   else
+   {
+      return ERROR;
+   }
+}
