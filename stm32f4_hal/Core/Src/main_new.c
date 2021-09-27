@@ -102,6 +102,50 @@ void legTest(uint8_t leg_num)
    HAL_Delay(1000);
 }
 
+void legDataTest(uint8_t leg_num)
+{
+   int16_t angle = 0;
+   int16_t vel = 0;
+   int16_t torque = 0;
+
+   UART_printStr("Leg: ");
+   UART_printLn(leg_num);
+
+   angle = getAngle(leg_num * 3);
+   vel = getVelocity(leg_num * 3);
+   torque = getTorque(leg_num * 3);
+
+   UART_printStr("q: ");
+   UART_printDiv(angle * (float)300 / (float)1024);
+   UART_printStr(" vel: ");
+   UART_printDiv(vel);
+   UART_printStr(" torque: ");
+   UART_printDivLn(torque);
+
+   angle = getAngle(leg_num * 3 + 1);
+   vel = getVelocity(leg_num * 3 + 1);
+   torque = getTorque(leg_num * 3 + 1);
+
+   UART_printStr(" q: ");
+   UART_printDiv(angle * (float)300 / (float)1024);
+   UART_printStr(" vel: ");
+   UART_printDiv(vel);
+   UART_printStr(" torque: ");
+   UART_printDivLn(torque);
+
+   angle = getAngle(leg_num * 3 + 2);
+   vel = getVelocity(leg_num * 3 + 2);
+   torque = getTorque(leg_num * 3 + 2);
+
+   UART_printStr(" q: ");
+   UART_printDiv(angle * (float)300 / (float)1024);
+   UART_printStr(" vel: ");
+   UART_printDiv(vel);
+   UART_printStr(" torque: ");
+   UART_printDivLn(torque);
+   UART_printStrLn(" ");
+}
+
 int main()
 {
    setup();
@@ -128,6 +172,10 @@ int main()
       // legTest(0);
       // legTest(1);
 
+      // legDataTest(0);
+      // HAL_Delay(500);
+      // legDataTest(1);
+
       // servoTest(0);
       // servoTest(1);
       // servoTest(2);
@@ -135,12 +183,12 @@ int main()
 
       // servoTest(s);
 
-      pingServo(0);
-      pingServo(1);
-      pingServo(2);
-      pingServo(3);
-      pingServo(4);
-      pingServo(5);
+      // pingServo(0);
+      // pingServo(1);
+      // pingServo(2);
+      // pingServo(3);
+      // pingServo(4);
+      // pingServo(5);
 
       // HAL_Delay(100);
       // pushButton();

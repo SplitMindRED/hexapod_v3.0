@@ -16,7 +16,7 @@
 #define JOINT_MODE   1
 #define WHEEL_MODE   2
 
-#define U1_DEBUG
+// #define U1_DEBUG
 #define U3_DEBUG
 #define U6_DEBUG
 
