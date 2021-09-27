@@ -146,6 +146,30 @@ void legDataTest(uint8_t leg_num)
    UART_printStrLn(" ");
 }
 
+void copyLegMovement()
+{
+   int16_t angle[3] = { 0, 0, 0 };
+
+   // jointMode(3);
+   // jointMode(4);
+   // jointMode(5);
+
+   angle[0] = getAngle(0);
+   angle[1] = getAngle(1);
+   angle[2] = getAngle(2);
+
+   setAngle(3, angle[0]);
+   setAngle(4, angle[1]);
+   setAngle(5, angle[2]);
+
+   UART_printStr("q0: ");
+   UART_printDiv(angle[0] * (float)300 / (float)1024);
+   UART_printStr(" q1: ");
+   UART_printDiv(angle[1] * (float)300 / (float)1024);
+   UART_printStr(" q2: ");
+   UART_printDivLn(angle[2] * (float)300 / (float)1024);
+}
+
 int main()
 {
    setup();
@@ -156,6 +180,10 @@ int main()
    int16_t torque = 0;
 
    unsigned long t1 = 0, t2 = 0;
+
+   jointMode(3);
+   jointMode(4);
+   jointMode(5);
 
    // uint8_t s = 5;
    // changeId(s);
@@ -169,6 +197,7 @@ int main()
 
    while (1)
    {
+      copyLegMovement();
       // legTest(0);
       // legTest(1);
 
