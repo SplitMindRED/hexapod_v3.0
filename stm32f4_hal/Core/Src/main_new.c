@@ -79,26 +79,26 @@ void servoTest(uint8_t servo_id)
 
 void legTest(uint8_t leg_num)
 {
-   pingServo(leg_num);
-   pingServo(leg_num + 1);
-   pingServo(leg_num + 2);
+   pingServo(leg_num * 3);
+   pingServo(leg_num * 3 + 1);
+   pingServo(leg_num * 3 + 2);
 
-   jointMode(leg_num);
-   jointMode(leg_num + 1);
-   jointMode(leg_num + 2);
+   jointMode(leg_num * 3);
+   jointMode(leg_num * 3 + 1);
+   jointMode(leg_num * 3 + 2);
 
-   setVelocity(leg_num, 100 + 1024);
-   setVelocity(leg_num + 1, 100 + 1024);
-   setVelocity(leg_num + 2, 100 + 1024);
+   setVelocity(leg_num * 3, 100 + 1024);
+   setVelocity(leg_num * 3 + 1, 100 + 1024);
+   setVelocity(leg_num * 3 + 2, 100 + 1024);
 
-   setAngle(leg_num, 475);
-   setAngle(leg_num + 1, 475);
-   setAngle(leg_num + 2, 475);
+   setAngle(leg_num * 3, 475);
+   setAngle(leg_num * 3 + 1, 475);
+   setAngle(leg_num * 3 + 2, 475);
    HAL_Delay(1000);
 
-   setAngle(leg_num, 525);
-   setAngle(leg_num + 1, 525);
-   setAngle(leg_num + 2, 525);
+   setAngle(leg_num * 3, 525);
+   setAngle(leg_num * 3 + 1, 525);
+   setAngle(leg_num * 3 + 2, 525);
    HAL_Delay(1000);
 }
 
@@ -113,7 +113,7 @@ int main()
 
    unsigned long t1 = 0, t2 = 0;
 
-   // uint8_t s = 2;
+   // uint8_t s = 5;
    // changeId(s);
 
    // jointMode(s);
@@ -125,14 +125,22 @@ int main()
 
    while (1)
    {
-      legTest(0);
+      // legTest(0);
+      // legTest(1);
+
       // servoTest(0);
       // servoTest(1);
       // servoTest(2);
+      // servoTest(3);
 
-      // pingServo(1);
-      // pingServo(2);
-      // pingServo(s);
+      // servoTest(s);
+
+      pingServo(0);
+      pingServo(1);
+      pingServo(2);
+      pingServo(3);
+      pingServo(4);
+      pingServo(5);
 
       // HAL_Delay(100);
       // pushButton();

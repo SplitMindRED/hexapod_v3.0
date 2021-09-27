@@ -19,6 +19,7 @@ int8_t pingServo(uint8_t servo_id)
 {
    unsigned char packet[6];
    unsigned char checksum;
+   uint8_t hal_return = 0;
 
    uint8_t answer[20];
 
@@ -36,9 +37,25 @@ int8_t pingServo(uint8_t servo_id)
    packet[4] = AX_PING;
    packet[5] = checksum;
 
-   HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
+   {
+      HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+   }
+   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
+   {
+      HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
+   }
 
-   if (HAL_UART_Receive(UART1, answer, 7, MAX_DELAY) != HAL_OK)
+   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
+   {
+      hal_return = HAL_UART_Receive(UART1, answer, 7, MAX_DELAY);
+   }
+   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
+   {
+      hal_return = HAL_UART_Receive(UART6, answer, 7, MAX_DELAY);
+   }
+
+   if (hal_return != HAL_OK)
    {
 #ifdef U1_DEBUG
       UART_printStr("Servo ");
@@ -79,6 +96,7 @@ int8_t jointMode(uint8_t servo_id)
    uint8_t limit_L = 1023;
    uint8_t limit_H = 1023 >> 8;
    unsigned char checksum = 0;
+   uint8_t hal_return = 0;
 
    checksum = (~(servo_id + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_CCW_ANGLE_LIMIT_L + limit_L + limit_H));
 
@@ -92,7 +110,25 @@ int8_t jointMode(uint8_t servo_id)
    packet[7] = limit_H;
    packet[8] = checksum;
 
-   if (HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY) == HAL_OK)
+   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
+   {
+      HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+   }
+   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
+   {
+      HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
+   }
+
+   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
+   {
+      hal_return = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+   }
+   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
+   {
+      hal_return = HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
+   }
+
+   if (hal_return == HAL_OK)
    {
       // servo[servo_id].mode = JOINT_MODE;
       return OK;
@@ -107,6 +143,8 @@ int8_t wheelMode(uint8_t servo_id, bool status)
 {
    unsigned char packet[9];
    unsigned char checksum;
+   uint8_t hal_return = 0;
+
 
    checksum = (~(servo_id + AX_GOAL_LENGTH + AX_WRITE_DATA + AX_CCW_ANGLE_LIMIT_L));
 
