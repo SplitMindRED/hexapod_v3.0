@@ -1,6 +1,7 @@
 #include "main.h"
 #include "usart.h"
 #include "gpio.h"
+#include "spi.h"
 #include "splitmind_f401_hal_lib.h"
 #include "hal_dynamixel_ax12_a.h"
 
@@ -8,19 +9,20 @@ void setup()
 {
    initPeriph();
 
-   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+   // HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 }
+
 
 void pushButton()
 {
-   if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == 1)
-   {
-      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-   }
-   else
-   {
-      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-   }
+   // if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == 1)
+   // {
+   //    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+   // }
+   // else
+   // {
+   //    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+   // }
 }
 
 void testMove(uint16_t pause)
@@ -170,20 +172,26 @@ void copyLegMovement()
    UART_printDivLn(angle[2] * (float)300 / (float)1024);
 }
 
+uint8_t data1[2] = { 17, 99 };
+uint8_t data2[2] = { 0, 0 };
+
+
 int main()
 {
    setup();
 
-   int16_t angle = 0;
-   int16_t vel = 0;
-   int8_t TE = 0;
-   int16_t torque = 0;
+   // HAL_SPI_Receive_IT(7hspi1, );
 
-   unsigned long t1 = 0, t2 = 0;
+   // int16_t angle = 0;
+   // int16_t vel = 0;
+   // int8_t TE = 0;
+   // int16_t torque = 0;
 
-   jointMode(3);
-   jointMode(4);
-   jointMode(5);
+   // unsigned long t1 = 0, t2 = 0;
+
+   // jointMode(3);
+   // jointMode(4);
+   // jointMode(5);
 
    // uint8_t s = 5;
    // changeId(s);
@@ -195,9 +203,28 @@ int main()
    // wheelMode(s, 1);
    // setVelocity(s, 150 + 1024);
 
+   // HAL_SPI_Receive_IT(&hspi1, data2, 2);
+   // HAL_SPI_TransmitReceive_IT(&hspi1, data1, data2, 2);
+
    while (1)
    {
-      copyLegMovement();
+      //      HAL_SPI_Receive(&hspi1, data, 2, HAL_MAX_DELAY);
+      // HAL_SPI_Receive_IT(&hspi1, data, 2);
+
+      // if (data2[0] != 0 && data2[1] != 0)
+      // {
+      //    UART_printStr("Byte 0: ");
+      //    UART_print(data2[0]);
+      //    UART_printStr(" byte 1: ");
+      //    UART_printLn(data2[1]);
+      // }
+
+      // UART_printStr("Byte 0: ");
+      // UART_print(data[0]);
+      // UART_printStr(" byte 1: ");
+      // UART_printLn(data[1]);
+
+      // copyLegMovement();
       // legTest(0);
       // legTest(1);
 

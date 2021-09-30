@@ -4,14 +4,14 @@ volatile unsigned long system_time = 0;
 
 void turnLed(bool status)
 {
-   if (status == 1)
-   {
-      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-   }
-   else
-   {
-      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-   }
+//   if (status == 1)
+//   {
+//      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+//   }
+//   else
+//   {
+//      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+//   }
 }
 
 
