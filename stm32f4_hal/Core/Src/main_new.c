@@ -5,13 +5,21 @@
 #include "splitmind_f401_hal_lib.h"
 #include "hal_dynamixel_ax12_a.h"
 
+uint8_t data1[2] = { 17, 99 };
+uint8_t data2[2] = { 0, 0 };
+
+int16_t servoData[6] = { 0, 0, 0, 0, 0, 0 };
+int16_t dummy[6] = { 0, 0, 0, 0, 0, 0 };
+
+bool flag = 0;
+
+
 void setup()
 {
    initPeriph();
 
    // HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 }
-
 
 void pushButton()
 {
@@ -172,15 +180,56 @@ void copyLegMovement()
    UART_printDivLn(angle[2] * (float)300 / (float)1024);
 }
 
-uint8_t data1[2] = { 17, 99 };
-uint8_t data2[2] = { 0, 0 };
+void transferData()
+{
+   int16_t angle = 0;
+   int16_t torque = 0;
 
+   HAL_Delay(10);
+
+   // for (uint8_t i = 0; i < 3; i++)
+   // {
+   //    angle = getAngle(i);
+   //    torque = getTorque(i);
+   //    servoData[i * 2] = angle;
+   //    servoData[i * 2 + 1] = torque;
+   // }
+
+   // angle = getAngle(0);
+   // torque = getTorque(0);
+   // servoData[0] = angle;
+   // servoData[1] = torque;
+
+   // angle = getAngle(1);
+   // torque = getTorque(1);
+   // servoData[2] = angle;
+   // servoData[3] = torque;
+
+   // angle = getAngle(2);
+   // torque = getTorque(2);
+   // servoData[4] = angle;
+   // servoData[5] = torque;
+
+   servoData[0] = getAngle(0);
+   servoData[1] = getTorque(0);
+
+   servoData[2] = getAngle(1);
+   servoData[3] = getTorque(1);
+
+   servoData[4] = getAngle(2);
+   servoData[5] = getTorque(2);
+}
+
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+   flag = 1;
+   // HAL_SPI_TransmitReceive_IT(&hspi1, data1, data2, 2);
+   HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
+}
 
 int main()
 {
    setup();
-
-   // HAL_SPI_Receive_IT(7hspi1, );
 
    // int16_t angle = 0;
    // int16_t vel = 0;
@@ -204,19 +253,27 @@ int main()
    // setVelocity(s, 150 + 1024);
 
    // HAL_SPI_Receive_IT(&hspi1, data2, 2);
-   // HAL_SPI_TransmitReceive_IT(&hspi1, data1, data2, 2);
+   HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
+
+   setAngle(0, 512);
+   setAngle(1, (150 + 60) * DEG_TO_TICK);
+   setAngle(2, (150 + 110) * DEG_TO_TICK);
 
    while (1)
    {
+      transferData();
+
       //      HAL_SPI_Receive(&hspi1, data, 2, HAL_MAX_DELAY);
       // HAL_SPI_Receive_IT(&hspi1, data, 2);
 
       // if (data2[0] != 0 && data2[1] != 0)
+      // if (flag == 1)
       // {
       //    UART_printStr("Byte 0: ");
       //    UART_print(data2[0]);
       //    UART_printStr(" byte 1: ");
       //    UART_printLn(data2[1]);
+      //    flag = 0;
       // }
 
       // UART_printStr("Byte 0: ");
