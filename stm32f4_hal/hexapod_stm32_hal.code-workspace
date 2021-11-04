@@ -17,7 +17,8 @@
          "stm32f4xx_hal.h": "c",
          "i2c.h": "c",
          "tim.h": "c",
-         "mpu9250.h": "c"
+         "mpu9250.h": "c",
+         "adc.h": "c"
       }
    }
 }

@@ -57,6 +57,46 @@ int8_t initAllDynamixel(void)
    return OK;
 }
 
+uint8_t HAL_Transmit(uint8_t servo_id, uint8_t *packet, uint8_t size)
+{
+   uint8_t hal_return = 0;
+
+   if (servo_id == 3 || servo_id == 4 || servo_id == 5 || servo_id == 6 || servo_id == 7 || servo_id == 8)
+   {
+      hal_return = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+   }
+   else if (servo_id == 0 || servo_id == 1 || servo_id == 2 || servo_id == 9 || servo_id == 10 || servo_id == 11)
+   {
+      hal_return = HAL_UART_Transmit(UART2, packet, sizeof(packet), MAX_DELAY);
+   }
+   else if (servo_id == 12 || servo_id == 13 || servo_id == 14 || servo_id == 15 || servo_id == 16 || servo_id == 17)
+   {
+      hal_return = HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
+   }
+
+   return hal_return;
+}
+
+uint8_t HAL_Recieve(uint8_t servo_id, uint8_t *answer)
+{
+   uint8_t hal_return = 0;
+
+   if (servo_id == 3 || servo_id == 4 || servo_id == 5 || servo_id == 6 || servo_id == 7 || servo_id == 8)
+   {
+      hal_return = HAL_UART_Receive(UART1, answer, 7, MAX_DELAY);
+   }
+   else if (servo_id == 0 || servo_id == 1 || servo_id == 2 || servo_id == 9 || servo_id == 10 || servo_id == 11)
+   {
+      hal_return = HAL_UART_Receive(UART2, answer, 7, MAX_DELAY);
+   }
+   else if (servo_id == 12 || servo_id == 13 || servo_id == 14 || servo_id == 15 || servo_id == 16 || servo_id == 17)
+   {
+      hal_return = HAL_UART_Receive(UART6, answer, 7, MAX_DELAY);
+   }
+
+   return hal_return;
+}
+
 int8_t pingSpecificServo(UART_HandleTypeDef *huart, uint8_t servo_id)
 {
    unsigned char packet[6];
@@ -142,49 +182,9 @@ int8_t pingServo(uint8_t servo_id)
    packet[4] = AX_PING;
    packet[5] = checksum;
 
-   // if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   // {
-   //    HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
-   // }
-   // else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   // {
-   //    HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
-   // }
+   HAL_Transmit(servo_id, packet, sizeof(packet));
 
-   if (servo_id == 3 || servo_id == 4 || servo_id == 5 || servo_id == 6 || servo_id == 7 || servo_id == 8)
-   {
-      HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
-   }
-   else if (servo_id == 0 || servo_id == 1 || servo_id == 2 || servo_id == 9 || servo_id == 10 || servo_id == 11)
-   {
-      HAL_UART_Transmit(UART2, packet, sizeof(packet), MAX_DELAY);
-   }
-   else if (servo_id == 12 || servo_id == 13 || servo_id == 14 || servo_id == 15 || servo_id == 16 || servo_id == 17)
-   {
-      HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
-   }
-
-   // if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   // {
-   //    hal_return = HAL_UART_Receive(UART1, answer, 7, MAX_DELAY);
-   // }
-   // else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   // {
-   //    hal_return = HAL_UART_Receive(UART6, answer, 7, MAX_DELAY);
-   // }
-
-   if (servo_id == 3 || servo_id == 4 || servo_id == 5 || servo_id == 6 || servo_id == 7 || servo_id == 8)
-   {
-      hal_return = HAL_UART_Receive(UART1, answer, 7, MAX_DELAY);
-   }
-   else if (servo_id == 0 || servo_id == 1 || servo_id == 2 || servo_id == 9 || servo_id == 10 || servo_id == 11)
-   {
-      hal_return = HAL_UART_Receive(UART2, answer, 7, MAX_DELAY);
-   }
-   else if (servo_id == 12 || servo_id == 13 || servo_id == 14 || servo_id == 15 || servo_id == 16 || servo_id == 17)
-   {
-      hal_return = HAL_UART_Receive(UART6, answer, 7, MAX_DELAY);
-   }
+   hal_return = HAL_Recieve(servo_id, answer);
 
    if (hal_return != HAL_OK)
    {
@@ -193,7 +193,7 @@ int8_t pingServo(uint8_t servo_id)
       UART_print(servo_id);
       UART_printStrLn(" recieve ping FAIL!");
 #endif
-      turnLed(1);
+      led_error(1);
       return ERROR;
    }
 
@@ -206,7 +206,7 @@ int8_t pingServo(uint8_t servo_id)
       UART_print(servo_id);
       UART_printStrLn(" ping SUCCSESS!");
 #endif
-      turnLed(0);
+      led_error(0);
       return OK;
    }
    else
@@ -216,7 +216,7 @@ int8_t pingServo(uint8_t servo_id)
       UART_print(servo_id);
       UART_printStrLn(" ping FAIL!");
 #endif      
-      turnLed(1);
+      led_error(1);
       return ERROR;
    }
 }
@@ -241,22 +241,32 @@ int8_t jointMode(uint8_t servo_id)
    packet[7] = limit_H;
    packet[8] = checksum;
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
-   }
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
 
    if (hal_return == HAL_OK)
    {
-      // servo[servo_id].mode = JOINT_MODE;
+      servo[servo_id].mode = JOINT_MODE;
+
+      led_error(0);
+
+#ifdef U_DEBUG
+      UART_printStr("Servo ");
+      UART_print(servo_id);
+      UART_printStrLn(" in joint mode!");
+#endif      
+
       return OK;
    }
    else
    {
+      led_error(1);
+
+#ifdef U_DEBUG
+      UART_printStr("Servo ");
+      UART_print(servo_id);
+      UART_printStrLn(" set joint mode TRANSMIT FAIL!");
+#endif     
+
       return ERROR;
    }
 }
@@ -289,26 +299,32 @@ int8_t wheelMode(uint8_t servo_id, bool status)
    // packet[7] = 0x00;
    // packet[8] = 0xEE;
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      hal_return = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      hal_return = HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
-   }
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
 
    if (hal_return == HAL_OK)
    {
-      // servo[servo_id].mode = WHEEL_MODE;
+      servo[servo_id].mode = WHEEL_MODE;
+
+      led_error(0);
+
+#ifdef U_DEBUG
+      UART_printStr("Servo ");
+      UART_print(servo_id);
+      UART_printStrLn(" in wheel mode!");
+#endif      
+
       return OK;
    }
    else
    {
+      led_error(1);
+
 #ifdef U_DEBUG
-      UART_printStrLn("Set wheel mode transmit FAIL!");
-#endif
-      turnLed(1);
+      UART_printStr("Servo ");
+      UART_print(servo_id);
+      UART_printStrLn(" set wheel mode TRANSMIT FAIL!");
+#endif     
+
       return ERROR;
    }
 }
@@ -337,42 +353,28 @@ int16_t getAngle(uint8_t servo_id)
    packet[6] = AX_2_BYTE_READ;
    packet[7] = checksum;
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      hal_return = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      hal_return = HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
-   }
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
 
    if (hal_return != HAL_OK)
    {
 #ifdef U_DEBUG
       UART_printStrLn("Read pos transmit FAIL!");
 #endif
-      turnLed(1);
+      led_error(1);
 
-      // return ERROR;
+      return ERROR;
    }
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      hal_return = HAL_UART_Receive(UART1, answer, 9, MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      hal_return = HAL_UART_Receive(UART6, answer, 9, MAX_DELAY);
-   }
+   hal_return = HAL_Recieve(servo_id, answer);
 
    if (hal_return != HAL_OK)
    {
 #ifdef U_DEBUG
       UART_printStrLn("Read pos recieve answer FAIL!");
 #endif
-      turnLed(1);
+      led_error(1);
 
-      // return ERROR;
+      return ERROR;
    }
 
    ServoResponse response = checkResponse(servo_id, answer);
@@ -380,7 +382,11 @@ int16_t getAngle(uint8_t servo_id)
    if (response.result == OK)
    {
       uint16_t pos = response.params[0] | (response.params[1] << 8);
-      // servo[servo_id].angle = pos;
+
+      servo[servo_id].angle = pos;
+
+      led_error(0);
+
       return pos;
    }
    else
@@ -388,6 +394,9 @@ int16_t getAngle(uint8_t servo_id)
 #ifdef U_DEBUG
       UART_printStrLn("Read pos FAIL!");
 #endif
+
+      led_error(1);
+
       return ERROR;
    }
 }
@@ -416,42 +425,28 @@ int16_t getVelocity(uint8_t servo_id)
    packet[6] = AX_2_BYTE_READ;
    packet[7] = checksum;
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      hal_return = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      hal_return = HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
-   }
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
 
    if (hal_return != HAL_OK)
    {
 #ifdef U_DEBUG
       UART_printStrLn("Read vel transmit FAIL!");
 #endif
-      turnLed(1);
+      led_error(1);
 
-      // return ERROR;
+      return ERROR;
    }
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      hal_return = HAL_UART_Receive(UART1, answer, 9, MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      hal_return = HAL_UART_Receive(UART6, answer, 9, MAX_DELAY);
-   }
+   hal_return = HAL_Recieve(servo_id, answer);
 
    if (hal_return != HAL_OK)
    {
 #ifdef U_DEBUG
       UART_printStrLn("Read vel recieve answer FAIL!");
 #endif
-      turnLed(1);
+      led_error(1);
 
-      // return ERROR;
+      return ERROR;
    }
 
    ServoResponse response = checkResponse(servo_id, answer);
@@ -459,13 +454,16 @@ int16_t getVelocity(uint8_t servo_id)
    if (response.result == OK)
    {
       int16_t vel = response.params[0] | (response.params[1] << 8);
-      // servo[servo_id].velocity = vel;
+
+      servo[servo_id].velocity = vel;
 
       if ((vel & 1 << 10))
       {
          vel &= ~(1 << 10);
          vel = -vel;
       }
+
+      led_error(0);
 
       return vel;
    }
@@ -477,7 +475,7 @@ int16_t getVelocity(uint8_t servo_id)
       UART_printStrLn(" read velocity FAIL!");
 #endif
 
-      turnLed(1);
+      led_error(1);
 
       return ERROR;
    }
@@ -507,42 +505,28 @@ int16_t getTorque(uint8_t servo_id)
    packet[6] = AX_2_BYTE_READ;
    packet[7] = checksum;
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      hal_return = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      hal_return = HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
-   }
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
 
    if (hal_return != HAL_OK)
    {
 #ifdef U_DEBUG
-      UART_printStrLn("Read pos transmit FAIL!");
+      UART_printStrLn("Read torque transmit FAIL!");
 #endif
-      turnLed(1);
+      led_error(1);
 
-      // return ERROR;
+      return ERROR;
    }
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
-   {
-      hal_return = HAL_UART_Receive(UART1, answer, 9, MAX_DELAY);
-   }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
-   {
-      hal_return = HAL_UART_Receive(UART6, answer, 9, MAX_DELAY);
-   }
+   hal_return = HAL_Recieve(servo_id, answer);
 
    if (hal_return != HAL_OK)
    {
 #ifdef U_DEBUG
-      UART_printStrLn("Read pos recieve answer FAIL!");
+      UART_printStrLn("Read torque recieve answer FAIL!");
 #endif
-      turnLed(1);
+      led_error(1);
 
-      // return ERROR;
+      return ERROR;
    }
 
    ServoResponse response = checkResponse(servo_id, answer);
@@ -550,7 +534,8 @@ int16_t getTorque(uint8_t servo_id)
    if (response.result == OK)
    {
       int16_t torque = response.params[0] | (response.params[1] << 8);
-      // servo[servo_id].torque = torque;
+
+      servo[servo_id].torque = torque;
 
       if ((torque & 1 << 10))
       {
@@ -558,18 +543,23 @@ int16_t getTorque(uint8_t servo_id)
          torque = -torque;
       }
 
+      led_error(0);
+
       return torque;
    }
    else
    {
 #ifdef U_DEBUG
-      UART_printStrLn("Read pos FAIL!");
+      UART_printStrLn("Read torque FAIL!");
 #endif
+
+      led_error(1);
+
       return ERROR;
    }
 }
 
-void setAngle(uint8_t servo_id, uint16_t angle)
+int8_t setAngle(uint8_t servo_id, uint16_t angle)
 {
    unsigned char packet[9];
    uint8_t angle_L = angle;
@@ -589,22 +579,32 @@ void setAngle(uint8_t servo_id, uint16_t angle)
    packet[7] = angle_H;
    packet[8] = checksum;
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
+
+   if (hal_return != HAL_OK)
    {
-      hal_return = HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+#ifdef U_DEBUG
+      UART_printStrLn("Set angle transmit FAIL!");
+#endif
+      led_error(1);
+
+      return ERROR;
    }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
+   else
    {
-      hal_return = HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
+      led_error(0);
+
+      return OK;
    }
 }
 
-void setVelocity(uint8_t servo_id, int16_t velocity)
+int8_t setVelocity(uint8_t servo_id, int16_t velocity)
 {
    uint8_t velocity_L, velocity_H;
    velocity_H = velocity >> 8;
    velocity_L = velocity;                     // 16 bits - 2 x 8 bits variables
    unsigned char checksum;
+   uint8_t hal_return = 0;
 
    unsigned char packet[9];
 
@@ -630,17 +630,26 @@ void setVelocity(uint8_t servo_id, int16_t velocity)
    // packet[7] = 0x00;
    // packet[8] = 0x72;
 
-   if (servo_id == 0 || servo_id == 1 || servo_id == 2)
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
+
+   if (hal_return != HAL_OK)
    {
-      HAL_UART_Transmit(UART1, packet, sizeof(packet), MAX_DELAY);
+#ifdef U_DEBUG
+      UART_printStrLn("Set velocity transmit FAIL!");
+#endif
+      led_error(1);
+
+      return ERROR;
    }
-   else if (servo_id == 3 || servo_id == 4 || servo_id == 5)
+   else
    {
-      HAL_UART_Transmit(UART6, packet, sizeof(packet), MAX_DELAY);
+      led_error(0);
+
+      return OK;
    }
 }
 
-void setTorque(uint8_t servo_id, int16_t torque)
+int8_t setTorque(uint8_t servo_id, int16_t torque)
 {
 
 }
@@ -822,10 +831,14 @@ int8_t changeId(UART_HandleTypeDef *huart, uint8_t new_id)
 
    if (pingServo(new_id))
    {
+      led_error(0);
+
       return OK;
    }
    else
    {
+      led_error(1);
+
       return ERROR;
    }
 }

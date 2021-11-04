@@ -195,6 +195,9 @@ void led_board(bool flag);
 
 int8_t initAllDynamixel(void);
 
+uint8_t HAL_Transmit(uint8_t servo_id, uint8_t *packet, uint8_t size);
+uint8_t HAL_Recieve(uint8_t servo_id, uint8_t *answer);
+
 // ping a servo, returns true if we get back the expected values
 int8_t pingServo(uint8_t servo_id);
 int8_t pingSpecificServo(UART_HandleTypeDef *huart, uint8_t servo_id);
@@ -207,9 +210,9 @@ int16_t getAngle(uint8_t servo_id);
 int16_t getVelocity(uint8_t servo_id);
 int16_t getTorque(uint8_t servo_id);
 
-void setAngle(uint8_t servo_id, uint16_t angle);
-void setVelocity(uint8_t servo_id, int16_t velocity);
-void setTorque(uint8_t servo_id, int16_t torque);
+int8_t setAngle(uint8_t servo_id, uint16_t angle);
+int8_t setVelocity(uint8_t servo_id, int16_t velocity);
+int8_t setTorque(uint8_t servo_id, int16_t torque);
 
 int8_t getTorqueEnable(uint8_t servo_id);
 int8_t disableTorque(uint8_t servo_id);

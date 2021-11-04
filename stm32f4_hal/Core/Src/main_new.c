@@ -7,6 +7,7 @@
 #include "gpio.h"
 #include "spi.h"
 #include "i2c.h"
+#include "adc.h"
 #include "splitmind_f401_hal_lib.h"
 #include "hal_dynamixel_ax12_a.h"
 #include "mpu9250.h"
@@ -189,8 +190,8 @@ void copyLegMovement()
 //for spi
 void transferData()
 {
-   int16_t angle = 0;
-   int16_t torque = 0;
+   // int16_t angle = 0;
+   // int16_t torque = 0;
 
    HAL_Delay(10);
 
@@ -259,6 +260,35 @@ void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
    byte = 0;
 }
 
+void measureVbat()
+{
+   float v_raw = 0;
+   float v_bat = 0;
+   uint16_t raw;
+   float avr_raw = 0;
+   uint8_t avr = 25;
+
+   for (size_t i = 0; i < avr; i++)
+   {
+      HAL_ADC_Start(&hadc1);
+      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+
+      raw = HAL_ADC_GetValue(&hadc1);
+      HAL_Delay(1);
+      avr_raw += (float)raw;
+   }
+
+   avr_raw = avr_raw / (float)avr;
+
+   v_raw = (float)avr_raw / 4096 * (float)3.3;
+   UART_printDiv(v_raw);
+   UART_printStr(" ");
+
+   v_bat = v_raw * 7.8f;
+   UART_printDivLn(v_bat);
+}
+
+
 int main()
 {
    setup();
@@ -279,8 +309,15 @@ int main()
 
    while (1)
    {
-      // pingServo(6);
-      // testMoveServo(2, 1000);
+      // measureVbat();
+
+      // HAL_Delay(1000);
+      // servoTest(6);
+
+
+      pingServo(6);
+
+      // testMoveServo(6, 1000);
       // pingSpecificServo(UART1, 6);
 
       // transferData();
@@ -310,20 +347,6 @@ int main()
       // legDataTest(0);
       // HAL_Delay(500);
       // legDataTest(1);
-
-      // servoTest(0);
-      // servoTest(1);
-      // servoTest(2);
-      // servoTest(3);
-
-      // servoTest(s);
-
-      // pingServo(0);
-      // pingServo(1);
-      // pingServo(2);
-      // pingServo(3);
-      // pingServo(4);
-      // pingServo(5);
 
       // HAL_Delay(100);
       // pushButton();
