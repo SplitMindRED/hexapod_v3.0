@@ -1,6 +1,6 @@
 /***********************************************
 *	Dynamixel AX12-A
-*	Version 0.1
+*	Version 0.2
 *  0xFF 0xFF ID LENGTH INSTRUCTION PARAM_1 ... PARAM_N CHKSUM
 *  CHKSUM = ~(ID + LENGTH + INSTRUCTION + PARAM_1 + … PARAM_N)
  * Status Checksum = ~( ID + Length + Error + Parameter1 + … Parameter N )

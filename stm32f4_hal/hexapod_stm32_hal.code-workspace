@@ -14,7 +14,10 @@
          "usart.h": "c",
          "math.h": "c",
          "spi.h": "c",
-         "stm32f4xx_hal.h": "c"
+         "stm32f4xx_hal.h": "c",
+         "i2c.h": "c",
+         "tim.h": "c",
+         "mpu9250.h": "c"
       }
    }
 }

@@ -6,14 +6,22 @@
 #include "usart.h"
 #include "gpio.h"
 #include "spi.h"
+#include "i2c.h"
 #include "splitmind_f401_hal_lib.h"
 #include "hal_dynamixel_ax12_a.h"
+#include "mpu9250.h"
+
+#define MPU9250_ADDRESS 0xD0
+#define WHO_AM_I  0x75
 
 uint8_t data1[2] = { 17, 99 };
 uint8_t data2[2] = { 0, 0 };
 
 int16_t servoData[6] = { 0, 0, 0, 0, 0, 0 };
 int16_t dummy[6] = { 0, 0, 0, 0, 0, 0 };
+
+uint8_t byte = 0;
+uint8_t reg_address = WHO_AM_I;
 
 bool flag = 0;
 
@@ -24,6 +32,10 @@ void setup()
 
    led_error(1);
    led_loop(1);
+
+   HAL_Delay(500);
+   led_error(0);
+   led_loop(0);
 }
 
 //for button on NUCLEO
@@ -37,21 +49,6 @@ void pushButton()
    // {
    //    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
    // }
-}
-
-//move CW and CCW with desired pause
-void testMove(uint16_t pause)
-{
-   wheelMode(1, 1);
-   // wheelMode(2, 1);
-
-   setVelocity(1, 100);
-   // setVelocity(2, 100);
-
-   HAL_Delay(pause);
-   setVelocity(1, 100 + 1024);
-   // setVelocity(2, 100 + 1024);
-   HAL_Delay(pause);
 }
 
 //test specific servo with move CW and CCW with desired pause
@@ -230,41 +227,47 @@ void transferData()
    servoData[5] = getTorque(2);
 }
 
+//recieve spi interrupt
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
    flag = 1;
-   // HAL_SPI_TransmitReceive_IT(&hspi1, data1, data2, 2);
-   HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
+
+   //test transfer
+   HAL_SPI_TransmitReceive_IT(&hspi1, data1, data2, 2);
+
+   UART_printStr("b1: ");
+   UART_print(data2[0]);
+   UART_printStr(" b2: ");
+   UART_printLn(data2[1]);
+
+   //for visual force of leg
+   // HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
+}
+
+//interruption after tx
+void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+   //start waiting for recieve interrupt
+   HAL_I2C_Master_Receive_IT(&hi2c1, MPU9250_ADDRESS, &byte, 1);
+}
+
+//recieve data interrupt
+void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+   // I2C data ready!
+   UART_printLn(byte);
+   byte = 0;
 }
 
 int main()
 {
    setup();
 
-   // int16_t angle = 0;
-   // int16_t vel = 0;
-   // int8_t TE = 0;
-   // int16_t torque = 0;
-
-   // unsigned long t1 = 0, t2 = 0;
-
-   // jointMode(3);
-   // jointMode(4);
-   // jointMode(5);
-
-   // uint8_t s = 5;
-   // changeId(s);
-
-   // jointMode(s);
-   // setAngle(s, 500);
-   // vel = getVelocity(1);
-
-   // wheelMode(s, 1);
-   // setVelocity(s, 150 + 1024);
-
    // HAL_SPI_Receive_IT(&hspi1, data2, 2);
 
    // HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
+
+   HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)data1, (uint8_t *)data2, sizeof(data2));
 
    // setAngle(0, 512);
    // setAngle(1, (150 + 60) * DEG_TO_TICK);
@@ -272,15 +275,17 @@ int main()
 
    // changeId(UART1, 8);
 
+   HAL_I2C_Master_Transmit_IT(&hi2c1, MPU9250_ADDRESS, &reg_address, 1);
+
    while (1)
    {
-      // pingServo(2);
+      // pingServo(6);
       // testMoveServo(2, 1000);
-      pingSpecificServo(UART1, 6);
+      // pingSpecificServo(UART1, 6);
 
       // transferData();
 
-      //      HAL_SPI_Receive(&hspi1, data, 2, HAL_MAX_DELAY);
+      // HAL_SPI_Receive(&hspi1, data, 2, HAL_MAX_DELAY);
       // HAL_SPI_Receive_IT(&hspi1, data, 2);
 
       // if (data2[0] != 0 && data2[1] != 0)
