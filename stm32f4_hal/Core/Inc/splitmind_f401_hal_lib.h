@@ -29,18 +29,18 @@
 
 #define UART_DEBUG
 
+#define UART1 &huart1
+#define UART2 &huart2
+#define UART6 &huart6
+
 #define MAX_DELAY 15
 #define OK        1
 #define ERROR     -1
 
 //UART for debug
 #ifdef UART_DEBUG
-#define UDBG &huart2
+#define UDBG UART2
 #endif
-
-#define UART1 &huart1
-#define UART2 &huart2
-#define UART6 &huart6
 
 extern volatile unsigned long system_time;
 

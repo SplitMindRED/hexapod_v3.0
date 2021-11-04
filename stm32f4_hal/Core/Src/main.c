@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -65,8 +66,8 @@ void initPeriph()
    MX_USART2_UART_Init();
    MX_USART6_UART_Init();
 
-   MX_SPI1_Init();
-   HAL_SPI_MspInit(&hspi1);
+   // MX_SPI1_Init();
+   // HAL_SPI_MspInit(&hspi1);
 
    MX_GPIO_Init();
 }
@@ -132,7 +133,7 @@ void SystemClock_Config(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-   /* User can add his own implementation to report the HAL error return state */
+    /* User can add his own implementation to report the HAL error return state */
    __disable_irq();
    while (1)
    {
@@ -151,8 +152,8 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-   /* User can add his own implementation to report the file name and line number,
-      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    /* User can add his own implementation to report the file name and line number,
+       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

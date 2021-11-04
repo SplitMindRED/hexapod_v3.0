@@ -10,15 +10,16 @@
 #ifndef DYNAMIXEL_AX12_A_H
 #define DYNAMIXEL_AX12_A_H
 
-#include "main.h"
 #include "splitmind_f401_hal_lib.h"
+
+#define LOOP_LED     GPIOB, GPIO_PIN_7
+#define ERROR_LED    GPIOB, GPIO_PIN_6
+// #define ONBOARD_LED  GPIOC, GPIO_PIN_13
 
 #define JOINT_MODE   1
 #define WHEEL_MODE   2
 
-// #define U1_DEBUG
-#define U3_DEBUG
-#define U6_DEBUG
+#define U_DEBUG
 
 #define TICK_TO_DEG (float)300 / (float)1024
 #define DEG_TO_TICK (float)1024 / (float)300
@@ -167,8 +168,7 @@
 // Write instruction length ///////////////////////////////////////////////////////////////
 
 
-extern unsigned long delta;
-
+//struct for recieved package
 typedef struct ServoResponse
 {
    uint8_t id;
@@ -179,9 +179,9 @@ typedef struct ServoResponse
    int8_t result;
 } ServoResponse;
 
+//struct with all info about specific
 typedef struct Servo
 {
-   uint8_t id;
    uint8_t mode;
    uint16_t velocity;
    uint16_t angle;
@@ -189,11 +189,16 @@ typedef struct Servo
    bool is_moving;
 } Servo;
 
+void led_loop(bool flag);
+void led_error(bool flag);
+void led_board(bool flag);
+
 int8_t initAllDynamixel(void);
 
 // ping a servo, returns true if we get back the expected values
 int8_t pingServo(uint8_t servo_id);
-int8_t changeId(uint8_t new_id);
+int8_t pingSpecificServo(UART_HandleTypeDef *huart, uint8_t servo_id);
+int8_t changeId(UART_HandleTypeDef *huart, uint8_t new_id);
 
 int8_t jointMode(uint8_t servo_id);
 int8_t wheelMode(uint8_t servo_id, bool status);

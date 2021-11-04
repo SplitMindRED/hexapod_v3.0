@@ -1,3 +1,7 @@
+/***********************************************
+ * Main file
+************************************************/
+
 #include "main.h"
 #include "usart.h"
 #include "gpio.h"
@@ -13,14 +17,16 @@ int16_t dummy[6] = { 0, 0, 0, 0, 0, 0 };
 
 bool flag = 0;
 
-
 void setup()
 {
+   //init all periph with HAL generated functions
    initPeriph();
 
-   // HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+   led_error(1);
+   led_loop(1);
 }
 
+//for button on NUCLEO
 void pushButton()
 {
    // if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == 1)
@@ -33,6 +39,7 @@ void pushButton()
    // }
 }
 
+//move CW and CCW with desired pause
 void testMove(uint16_t pause)
 {
    wheelMode(1, 1);
@@ -47,6 +54,7 @@ void testMove(uint16_t pause)
    HAL_Delay(pause);
 }
 
+//test specific servo with move CW and CCW with desired pause
 void testMoveServo(uint8_t servo_id, uint16_t pause)
 {
    uint16_t speed = 150;
@@ -57,6 +65,7 @@ void testMoveServo(uint8_t servo_id, uint16_t pause)
    HAL_Delay(pause);
 }
 
+//feedback test of desired servo
 void servoTest(uint8_t servo_id)
 {
    int16_t angle = 0;
@@ -180,6 +189,7 @@ void copyLegMovement()
    UART_printDivLn(angle[2] * (float)300 / (float)1024);
 }
 
+//for spi
 void transferData()
 {
    int16_t angle = 0;
@@ -253,15 +263,22 @@ int main()
    // setVelocity(s, 150 + 1024);
 
    // HAL_SPI_Receive_IT(&hspi1, data2, 2);
-   HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
 
-   setAngle(0, 512);
-   setAngle(1, (150 + 60) * DEG_TO_TICK);
-   setAngle(2, (150 + 110) * DEG_TO_TICK);
+   // HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
+
+   // setAngle(0, 512);
+   // setAngle(1, (150 + 60) * DEG_TO_TICK);
+   // setAngle(2, (150 + 110) * DEG_TO_TICK);
+
+   // changeId(UART1, 8);
 
    while (1)
    {
-      transferData();
+      // pingServo(2);
+      // testMoveServo(2, 1000);
+      pingSpecificServo(UART1, 6);
+
+      // transferData();
 
       //      HAL_SPI_Receive(&hspi1, data, 2, HAL_MAX_DELAY);
       // HAL_SPI_Receive_IT(&hspi1, data, 2);

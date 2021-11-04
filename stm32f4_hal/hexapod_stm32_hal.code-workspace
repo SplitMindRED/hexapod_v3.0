@@ -1,11 +1,11 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"files.associations": {
+   "folders": [
+      {
+         "path": "."
+      }
+   ],
+   "settings": {
+      "files.associations": {
          "splitmind_f401_hal_lib.h": "c",
          "hal_dynamixel_ax12_a.h": "c",
          "main.h": "c",
@@ -13,7 +13,8 @@
          "stdbool.h": "c",
          "usart.h": "c",
          "math.h": "c",
-         "spi.h": "c"
+         "spi.h": "c",
+         "stm32f4xx_hal.h": "c"
       }
-	}
+   }
 }
