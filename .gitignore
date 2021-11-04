@@ -8,6 +8,7 @@ stm32f4/EventRecorderStub.scvd
 Logo
 stm32f4_hal/Drivers
 stm32f4_hal/MDK-ARM
+!stm32f4_hal/MDK-ARM/*.uvprojx
 stm32f4_hal/Drivers
 stm32f4_hal/.vscode
 Compass/*.cdw.bak
