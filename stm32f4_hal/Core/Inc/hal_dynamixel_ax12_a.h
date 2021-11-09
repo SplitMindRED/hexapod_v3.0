@@ -196,7 +196,7 @@ void led_board(bool flag);
 int8_t initAllDynamixel(void);
 
 uint8_t HAL_Transmit(uint8_t servo_id, uint8_t *packet, uint8_t size);
-uint8_t HAL_Recieve(uint8_t servo_id, uint8_t *answer);
+uint8_t HAL_Recieve(uint8_t servo_id, uint8_t *answer, uint8_t size);
 
 // ping a servo, returns true if we get back the expected values
 int8_t pingServo(uint8_t servo_id);

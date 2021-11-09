@@ -2,16 +2,21 @@
 
 volatile unsigned long system_time = 0;
 
+//   HAL_OK       = 0x00U,
+//   HAL_ERROR    = 0x01U,
+//   HAL_BUSY     = 0x02U,
+//   HAL_TIMEOUT  = 0x03U
+
 void turnLed(bool status)
 {
-//   if (status == 1)
-//   {
-//      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-//   }
-//   else
-//   {
-//      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-//   }
+   //   if (status == 1)
+   //   {
+   //      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+   //   }
+   //   else
+   //   {
+   //      HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+   //   }
 }
 
 

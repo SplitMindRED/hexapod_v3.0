@@ -37,6 +37,8 @@ void setup()
    HAL_Delay(500);
    led_error(0);
    led_loop(0);
+
+   initAllDynamixel();
 }
 
 //for button on NUCLEO
@@ -63,6 +65,115 @@ void testMoveServo(uint8_t servo_id, uint16_t pause)
    HAL_Delay(pause);
 }
 
+void servoTestAngle(uint8_t servo_id)
+{
+   int16_t angle = 0;
+
+   pingServo(servo_id);
+   jointMode(servo_id);
+
+   setAngle(servo_id, 475);
+   HAL_Delay(1000);
+
+   angle = getAngle(servo_id);
+
+   UART_printStr("q: ");
+   UART_printDivLn(angle * (float)300 / (float)1024);
+
+   setAngle(servo_id, 525);
+   HAL_Delay(1000);
+
+   angle = getAngle(servo_id);
+
+   UART_printStr("q: ");
+   UART_printDivLn(angle * (float)300 / (float)1024);
+}
+
+void servoTestVel(uint8_t servo_id)
+{
+   int16_t vel = 0;
+
+   pingServo(servo_id);
+   wheelMode(servo_id, 1);
+
+   setVelocity(servo_id, 100);
+   HAL_Delay(1000);
+
+   vel = getVelocity(servo_id);
+
+   UART_printStr("vel: ");
+   UART_printLn(vel);
+
+   setVelocity(servo_id, 100 + 1024);
+   HAL_Delay(1000);
+
+   vel = getVelocity(servo_id);
+
+   UART_printStr("vel: ");
+   UART_printLn(vel);
+}
+
+void testAngleVel(uint8_t servo_id)
+{
+   int16_t angle = 0;
+   int16_t vel = 0;
+
+   wheelMode(servo_id, 1);
+
+   setVelocity(servo_id, 100);
+
+   vel = getVelocity(servo_id);
+   angle = getAngle(servo_id);
+   // vel = getVelocity(servo_id);
+
+   UART_printStr("q: ");
+   UART_printDivLn(angle * (float)300 / (float)1024);
+
+   UART_printStr("vel: ");
+   UART_printDivLn(vel);
+
+   HAL_Delay(500);
+
+   vel = getVelocity(servo_id);
+   angle = getAngle(servo_id);
+   // vel = getVelocity(servo_id);
+
+   UART_printStr("q: ");
+   UART_printDivLn(angle * (float)300 / (float)1024);
+
+   UART_printStr("vel: ");
+   UART_printDivLn(vel);
+
+   HAL_Delay(1000);
+
+
+
+
+   setVelocity(servo_id, 100 + 1024);
+
+   vel = getVelocity(servo_id);
+   angle = getAngle(servo_id);
+
+   UART_printStr("q: ");
+   UART_printDivLn(angle * (float)300 / (float)1024);
+
+   UART_printStr("vel: ");
+   UART_printDivLn(vel);
+
+   HAL_Delay(500);
+
+   vel = getVelocity(servo_id);
+   angle = getAngle(servo_id);
+
+   UART_printStr("q: ");
+   UART_printDivLn(angle * (float)300 / (float)1024);
+
+   UART_printStr("vel: ");
+   UART_printDivLn(vel);
+
+   HAL_Delay(1000);
+}
+
 //feedback test of desired servo
 void servoTest(uint8_t servo_id)
 {
@@ -75,10 +186,7 @@ void servoTest(uint8_t servo_id)
    jointMode(servo_id);
    setVelocity(servo_id, 100 + 1024);
 
-   setAngle(servo_id, 475);
-   HAL_Delay(1000);
-   setAngle(servo_id, 525);
-   HAL_Delay(1000);
+   setAngle(servo_id, 300);
 
    angle = getAngle(servo_id);
    vel = getVelocity(servo_id);
@@ -92,6 +200,26 @@ void servoTest(uint8_t servo_id)
 
    UART_printStr("torque: ");
    UART_printDivLn(torque);
+
+   HAL_Delay(1000);
+
+   setAngle(servo_id, 800);
+
+   angle = getAngle(servo_id);
+   vel = getVelocity(servo_id);
+   torque = getTorque(servo_id);
+
+   UART_printStr("q: ");
+   UART_printDivLn(angle * (float)300 / (float)1024);
+
+   UART_printStr("vel: ");
+   UART_printDivLn(vel);
+
+   UART_printStr("torque: ");
+   UART_printDivLn(torque);
+
+   HAL_Delay(1000);
+
 }
 
 void legTest(uint8_t leg_num)
@@ -297,7 +425,7 @@ int main()
 
    // HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
 
-   HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)data1, (uint8_t *)data2, sizeof(data2));
+   // HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)data1, (uint8_t *)data2, sizeof(data2));
 
    // setAngle(0, 512);
    // setAngle(1, (150 + 60) * DEG_TO_TICK);
@@ -312,10 +440,12 @@ int main()
       // measureVbat();
 
       // HAL_Delay(1000);
-      // servoTest(6);
+      servoTest(6);
+      // testAngleVel(6);
+      // servoTestAngle(6);
+      // servoTestVel(6);
 
-
-      pingServo(6);
+      // pingServo(6);
 
       // testMoveServo(6, 1000);
       // pingSpecificServo(UART1, 6);
@@ -397,7 +527,9 @@ int main()
 
       // UART_printLn(HAL_GetTick());
 
-      // HAL_Delay(50);
+      led_loop(1);
+      HAL_Delay(100);
+      led_loop(0);
    }
 
    return 0;
