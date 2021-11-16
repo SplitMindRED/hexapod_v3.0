@@ -131,7 +131,7 @@ int8_t pingSpecificServo(UART_HandleTypeDef *huart, uint8_t servo_id)
       UART_print(servo_id);
       UART_printStrLn(" recieve ping FAIL!");
 
-      turnLed(1);
+      led_error(1);
 
       return ERROR;
    }
@@ -145,7 +145,8 @@ int8_t pingSpecificServo(UART_HandleTypeDef *huart, uint8_t servo_id)
       UART_print(servo_id);
       UART_printStrLn(" ping SUCCSESS!");
 
-      turnLed(0);
+      led_error(0);
+
       return OK;
    }
    else
@@ -155,7 +156,8 @@ int8_t pingSpecificServo(UART_HandleTypeDef *huart, uint8_t servo_id)
       UART_print(servo_id);
       UART_printStrLn(" ping FAIL!");
 
-      turnLed(1);
+      led_error(1);
+
       return ERROR;
    }
 }
@@ -271,7 +273,7 @@ int8_t jointMode(uint8_t servo_id)
    }
 }
 
-int8_t wheelMode(uint8_t servo_id, bool status)
+int8_t wheelMode(uint8_t servo_id)
 {
    unsigned char packet[9];
    unsigned char checksum;
@@ -473,11 +475,11 @@ int16_t getVelocity(uint8_t servo_id)
 
       servo[servo_id].velocity = vel;
 
-      if ((vel & 1 << 10))
-      {
-         vel &= ~(1 << 10);
-         vel = -vel;
-      }
+      // if ((vel & 1 << 10))
+      // {
+      //    vel &= ~(1 << 10);
+      //    vel = -vel;
+      // }
 
       led_error(0);
 
@@ -553,11 +555,11 @@ int16_t getTorque(uint8_t servo_id)
 
       servo[servo_id].torque = torque;
 
-      if ((torque & 1 << 10))
-      {
-         torque &= ~(1 << 10);
-         torque = -torque;
-      }
+      // if ((torque & 1 << 10))
+      // {
+      //    torque &= ~(1 << 10);
+      //    torque = -torque;
+      // }
 
       led_error(0);
 
@@ -719,7 +721,7 @@ int8_t setVelocity(uint8_t servo_id, int16_t velocity)
    }
 }
 
-int8_t setTorque(uint8_t servo_id, int16_t torque)
+int8_t setTorqueLimit(uint8_t servo_id, int16_t torque)
 {
 
 }
@@ -899,7 +901,7 @@ int8_t changeId(UART_HandleTypeDef *huart, uint8_t new_id)
 
    HAL_Delay(100);
 
-   if (pingServo(new_id))
+   if (pingSpecificServo(huart, new_id))
    {
       led_error(0);
 

@@ -204,14 +204,22 @@ int8_t pingSpecificServo(UART_HandleTypeDef *huart, uint8_t servo_id);
 int8_t changeId(UART_HandleTypeDef *huart, uint8_t new_id);
 
 int8_t jointMode(uint8_t servo_id);
-int8_t wheelMode(uint8_t servo_id, bool status);
+int8_t wheelMode(uint8_t servo_id);
 
+//0..1023
 int16_t getAngle(uint8_t servo_id);
+
+//0..2047 | 0..1023 - CCW, 1024..2047 - CW
 int16_t getVelocity(uint8_t servo_id);
+
+//0..2047 | 0..1023 - load works to CCW,  1024..2047 - CW
 int16_t getTorque(uint8_t servo_id);
 
+//0..1023 - 150 grad: 512 (home pos), 300 grad: 1023 (CCW), 0 grad: 0 (CW)
 int8_t setAngle(uint8_t servo_id, uint16_t angle);
 int8_t setVelocity(uint8_t servo_id, int16_t velocity);
+
+//setTorqueLimit 0..1023
 int8_t setTorque(uint8_t servo_id, int16_t torque);
 
 int8_t getTorqueEnable(uint8_t servo_id);

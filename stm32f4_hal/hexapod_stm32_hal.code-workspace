@@ -18,7 +18,8 @@
          "i2c.h": "c",
          "tim.h": "c",
          "mpu9250.h": "c",
-         "adc.h": "c"
+         "adc.h": "c",
+         "gpio.h": "c"
       }
    }
 }

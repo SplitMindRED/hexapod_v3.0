@@ -58,7 +58,7 @@ void pushButton()
 void testMoveServo(uint8_t servo_id, uint16_t pause)
 {
    uint16_t speed = 150;
-   wheelMode(servo_id, 1);
+   wheelMode(servo_id);
    setVelocity(servo_id, speed);
    HAL_Delay(pause);
    setVelocity(servo_id, speed + 1024);
@@ -94,7 +94,7 @@ void servoTestVel(uint8_t servo_id)
    int16_t vel = 0;
 
    pingServo(servo_id);
-   wheelMode(servo_id, 1);
+   wheelMode(servo_id);
 
    setVelocity(servo_id, 100);
    HAL_Delay(1000);
@@ -117,10 +117,11 @@ void testAngleVel(uint8_t servo_id)
 {
    int16_t angle = 0;
    int16_t vel = 0;
+   int16_t vt = 100;
 
-   wheelMode(servo_id, 1);
+   wheelMode(servo_id);
 
-   setVelocity(servo_id, 100);
+   setVelocity(servo_id, vt);
 
    vel = getVelocity(servo_id);
    angle = getAngle(servo_id);
@@ -147,9 +148,7 @@ void testAngleVel(uint8_t servo_id)
    HAL_Delay(1000);
 
 
-
-
-   setVelocity(servo_id, 100 + 1024);
+   setVelocity(servo_id, vt + 1024);
 
    vel = getVelocity(servo_id);
    angle = getAngle(servo_id);
@@ -384,8 +383,9 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
    // I2C data ready!
+   UART_printStr("MPU WHO AM I: ");
    UART_printLn(byte);
-   byte = 0;
+   // byte = 0;
 }
 
 void measureVbat()
@@ -396,17 +396,28 @@ void measureVbat()
    float avr_raw = 0;
    uint8_t avr = 25;
 
+   ADC_Select_CH9();
+
    for (size_t i = 0; i < avr; i++)
    {
       HAL_ADC_Start(&hadc1);
+
       HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 
       raw = HAL_ADC_GetValue(&hadc1);
+      // UART_printDiv(raw);
+      // UART_printStr(" ");
+
       HAL_Delay(1);
       avr_raw += (float)raw;
    }
 
+   HAL_ADC_Stop(&hadc1);
+
    avr_raw = avr_raw / (float)avr;
+   // UART_printDiv(avr_raw);
+   // UART_printStr(" ");
+
 
    v_raw = (float)avr_raw / 4096 * (float)3.3;
    UART_printDiv(v_raw);
@@ -416,6 +427,43 @@ void measureVbat()
    UART_printDivLn(v_bat);
 }
 
+void measureCurrent()
+{
+   uint16_t raw;
+   float v_raw = 0;
+   uint8_t avr = 25;
+   float avr_raw = 0;
+   float current = 0;
+
+   ADC_Select_CH8();
+
+   for (size_t i = 0; i < avr; i++)
+   {
+      HAL_ADC_Start(&hadc1);
+
+      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+
+      raw = HAL_ADC_GetValue(&hadc1);
+      // UART_printDiv(raw);
+      // UART_printStr(" ");
+
+      HAL_Delay(1);
+      avr_raw += (float)raw;
+   }
+
+   HAL_ADC_Stop(&hadc1);
+
+   avr_raw = avr_raw / (float)avr;
+   // UART_printDiv(avr_raw);
+   // UART_printStr(" ");
+
+   v_raw = (float)avr_raw / (float)4096 * (float)3.3;
+   UART_printDiv(v_raw);
+   UART_printStr(" ");
+
+   current = (v_raw - 2.5) / 0.1;
+   UART_printDivLn(current);
+}
 
 int main()
 {
@@ -435,97 +483,99 @@ int main()
 
    HAL_I2C_Master_Transmit_IT(&hi2c1, MPU9250_ADDRESS, &reg_address, 1);
 
+   wheelMode(6);
+   // jointMode(6);
+   // jointMode(8);
+
+   setVelocity(6, 50);
+
+   // setVelocity(6, 100 + 1024);
+   // setVelocity(6, 100); //present load ~40 inwheel mode
+
+   // setVelocity(6, 100 + 1024);
+   // setVelocity(6, 200); //~100
+
+   // setVelocity(6, 100 + 1024);
+   // setVelocity(6, 1023); //~600
+
+   // setAngle(6, 512);
+
+
+   // setAngle(8, 0);
+
+   // jointMode(6);
+
+   // setVelocity(6, 100);
+   // setAngle(6, 512);
+
+   // uint8_t s = 15;
+
+   // changeId(UART1, s);
+
+   int16_t torque = 0;
+   int16_t present_speed = 0;
+
+   unsigned long last_time = 0;
+   bool flag = 0;
+   uint16_t speed = 150;
+   uint16_t dt = 2;
+
    while (1)
    {
-      // measureVbat();
+      // pingSpecificServo(UART1, s);
 
-      // HAL_Delay(1000);
-      servoTest(6);
-      // testAngleVel(6);
-      // servoTestAngle(6);
-      // servoTestVel(6);
+      if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == 1)
+      {
+         UART_printLn(1);
+      }
+      else
+      {
+         UART_printLn(0);
+      }
 
-      // pingServo(6);
+      torque = getTorque(6);
+      present_speed = getVelocity(6);
 
-      // testMoveServo(6, 1000);
-      // pingSpecificServo(UART1, 6);
+      torque = torque & 0x7FF;
 
-      // transferData();
+      if ((torque & 1 << 10))
+      {
+         torque &= ~(1 << 10);
+         torque = -torque;
+         // torque = torque - 1024;
+      }
 
-      // HAL_SPI_Receive(&hspi1, data, 2, HAL_MAX_DELAY);
-      // HAL_SPI_Receive_IT(&hspi1, data, 2);
+      present_speed = present_speed & 0x7FF;
 
-      // if (data2[0] != 0 && data2[1] != 0)
-      // if (flag == 1)
+      if ((present_speed & 1 << 10))
+      {
+         present_speed &= ~(1 << 10);
+         present_speed = -present_speed;
+         // present_speed = present_speed - 1024;
+      }
+
+
+      // if (HAL_GetTick() >= (last_time + dt * 1000))
       // {
-      //    UART_printStr("Byte 0: ");
-      //    UART_print(data2[0]);
-      //    UART_printStr(" byte 1: ");
-      //    UART_printLn(data2[1]);
-      //    flag = 0;
+      //    last_time = HAL_GetTick();
+
+      //    flag = !flag;
+
+      //    if (flag)
+      //    {
+      //       setVelocity(6, speed);
+      //    }
+      //    else
+      //    {
+      //       setVelocity(6, speed + 1024);
+      //    }
       // }
 
-      // UART_printStr("Byte 0: ");
-      // UART_print(data[0]);
-      // UART_printStr(" byte 1: ");
-      // UART_printLn(data[1]);
 
-      // copyLegMovement();
-      // legTest(0);
-      // legTest(1);
-
-      // legDataTest(0);
-      // HAL_Delay(500);
-      // legDataTest(1);
-
-      // HAL_Delay(100);
-      // pushButton();
-      // testMove(500);
-
-      // testMoveServo(s, 500);
-
-      // setAngle(s, 475);
-      // HAL_Delay(500);
-      // setAngle(s, 525);
-      // HAL_Delay(500);
-
-      // setVelocity(s, 150 + 1024);
-      // HAL_Delay(500);
-      // setVelocity(s, 100 + 1024);
-      // HAL_Delay(500);
-
-      // t1 = HAL_GetTick();
-      // angle = getAngle(s);
-      // vel = getVelocity(s);
-      // torque = getTorque(s);
-      // TE = getTorqueEnable(1);
-      // disableTorque(1);
-      // t2 = HAL_GetTick();
-      // if (angle == ERROR)
-      // {
-
-      // }
-      // else
-      // {
-      //    setAngle(1, (uint16_t)angle);
-      // }    
-
-      // UART_printStr("q: ");
-      // UART_printDivLn(angle * (float)300 / (float)1024);
-
-      // UART_printStr("vel: ");
-      // UART_printDivLn(vel);
-
-      // UART_printStr("torque: ");
-      // UART_printDivLn(torque);
-
-      // UART_printStr("TE: ");
-      // UART_printDivLn(TE);
-
-      // UART_printStr("t: ");
-      // UART_printLn(t2 - t1);
-
-      // UART_printLn(HAL_GetTick());
+      UART_printStr("M: ");
+      UART_print(torque);
+      UART_printStr(" PS: ");
+      UART_printLn(present_speed);
 
       led_loop(1);
       HAL_Delay(100);
