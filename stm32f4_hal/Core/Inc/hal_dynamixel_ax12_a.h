@@ -183,9 +183,9 @@ typedef struct ServoResponse
 typedef struct Servo
 {
    uint8_t mode;
-   uint16_t velocity;
-   uint16_t angle;
-   uint16_t torque;
+   float velocity;
+   float angle;
+   float load;
    bool is_moving;
 } Servo;
 
@@ -217,10 +217,12 @@ int16_t getTorque(uint8_t servo_id);
 
 //0..1023 - 150 grad: 512 (home pos), 300 grad: 1023 (CCW), 0 grad: 0 (CW)
 int8_t setAngle(uint8_t servo_id, uint16_t angle);
+
+//Joint: 0..1023 | Wheel: 0..2047, 0 - stop while CCW, 
 int8_t setVelocity(uint8_t servo_id, int16_t velocity);
 
 //setTorqueLimit 0..1023
-int8_t setTorque(uint8_t servo_id, int16_t torque);
+int8_t setTorqueLimit(uint8_t servo_id, int16_t torque);
 
 int8_t getTorqueEnable(uint8_t servo_id);
 int8_t disableTorque(uint8_t servo_id);

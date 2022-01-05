@@ -49,7 +49,7 @@ int8_t initAllDynamixel(void)
       servo[i].mode = 0;
       servo[i].velocity = 0;
       servo[i].angle = 0;
-      servo[i].torque = 0;
+      servo[i].load = 0;
       servo[i].is_moving = false;
    }
 
@@ -385,7 +385,7 @@ int16_t getAngle(uint8_t servo_id)
    {
       uint16_t pos = response.params[0] | (response.params[1] << 8);
 
-      servo[servo_id].angle = pos;
+      servo[servo_id].angle = (float)pos * 300.0 / 1024.0;
 
       led_error(0);
 
@@ -553,7 +553,7 @@ int16_t getTorque(uint8_t servo_id)
    {
       int16_t torque = response.params[0] | (response.params[1] << 8);
 
-      servo[servo_id].torque = torque;
+      servo[servo_id].load = torque;
 
       // if ((torque & 1 << 10))
       // {
@@ -721,9 +721,75 @@ int8_t setVelocity(uint8_t servo_id, int16_t velocity)
    }
 }
 
-int8_t setTorqueLimit(uint8_t servo_id, int16_t torque)
+int8_t setTorqueLimit(uint8_t servo_id, int16_t torque_limit)
 {
+   unsigned char checksum = 0;
+   uint8_t torque_limit_L = torque_limit;
+   uint8_t torque_limit_H = torque_limit >> 8;
 
+   uint8_t hal_return = 0;
+
+   unsigned char packet[9];
+
+   checksum = (~(servo_id + 5 + AX_WRITE_DATA + AX_TORQUE_LIMIT_L + torque_limit_L + torque_limit_H));
+
+   packet[0] = AX_START;
+   packet[1] = AX_START;
+   packet[2] = servo_id;
+   packet[3] = 5;
+   packet[4] = AX_WRITE_DATA;
+   packet[5] = AX_TORQUE_LIMIT_L;
+   packet[6] = torque_limit_L;
+   packet[7] = torque_limit_H;
+   packet[8] = checksum;
+
+   hal_return = HAL_Transmit(servo_id, packet, sizeof(packet));
+
+   if (hal_return != HAL_OK)
+   {
+#ifdef U_DEBUG
+      UART_printStrLn("Set torque limit FAIL!");
+#endif
+      led_error(1);
+
+      return ERROR;
+   }
+
+   uint8_t answer[20];
+
+   hal_return = HAL_Recieve(servo_id, answer, 7);
+
+   if (hal_return != HAL_OK)
+   {
+#ifdef U_DEBUG
+      UART_printStrLn("Set torque limit recieve answer FAIL!");
+#endif
+      led_error(1);
+
+      return ERROR;
+   }
+
+   ServoResponse response = checkResponse(servo_id, answer);
+
+   if (response.result == OK)
+   {
+      led_error(0);
+
+      UART_printStr("Set torque limit: ");
+      UART_printLn(torque_limit);
+
+      return OK;
+   }
+   else
+   {
+#ifdef U_DEBUG
+      UART_printStrLn("Set torque limit response FAIL!");
+#endif
+
+      led_error(1);
+
+      return ERROR;
+   }
 }
 
 int8_t getTorqueEnable(uint8_t servo_id)

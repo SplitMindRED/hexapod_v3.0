@@ -31,14 +31,14 @@ void setup()
    //init all periph with HAL generated functions
    initPeriph();
 
-   led_error(1);
-   led_loop(1);
+   // led_error(1);
+   // led_loop(1);
 
-   HAL_Delay(500);
-   led_error(0);
-   led_loop(0);
+   // HAL_Delay(500);
+   // led_error(0);
+   // led_loop(0);
 
-   initAllDynamixel();
+   // initAllDynamixel();
 }
 
 //for button on NUCLEO
@@ -53,6 +53,26 @@ void pushButton()
    //    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
    // }
 }
+
+bool checkKeyButton()
+{
+   if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == 1)
+   {
+      //button is NOT pressed
+
+      // UART_printLn(1);
+      return 0;
+   }
+   else
+   {
+      HAL_Delay(300);
+      //button is pressed
+
+      // UART_printLn(0);
+      return 1;
+   }
+}
+
 
 //test specific servo with move CW and CCW with desired pause
 void testMoveServo(uint8_t servo_id, uint16_t pause)
@@ -465,6 +485,31 @@ void measureCurrent()
    UART_printDivLn(current);
 }
 
+void dynamixelTest(void)
+{
+   // changeId(UART1, 3);
+   // servoTest(3);
+   // setTorqueLimit(3, 300);
+   // jointMode(3);
+   // wheelMode(3);
+   int16_t q = 99;
+   int16_t dq = 99;
+   int16_t torque = 99;
+   torque = getTorque(3);
+   q = getAngle(3);
+   dq = getVelocity(3);
+   UART_printStr("q: ");
+   UART_print(q);
+   UART_printStr(" dq: ");
+   UART_print(dq);
+   UART_printStr(" t: ");
+   UART_printLn(torque);
+
+   // setAngle(3, 512);
+   setVelocity(3, 600 + 1024);
+   // UART_printLn(1);
+}
+
 int main()
 {
    setup();
@@ -481,13 +526,13 @@ int main()
 
    // changeId(UART1, 8);
 
-   HAL_I2C_Master_Transmit_IT(&hi2c1, MPU9250_ADDRESS, &reg_address, 1);
+   // HAL_I2C_Master_Transmit_IT(&hi2c1, MPU9250_ADDRESS, &reg_address, 1);
 
-   wheelMode(6);
+   // wheelMode(6);
    // jointMode(6);
    // jointMode(8);
 
-   setVelocity(6, 50);
+   // setVelocity(6, 50);
 
    // setVelocity(6, 100 + 1024);
    // setVelocity(6, 100); //present load ~40 inwheel mode
@@ -512,74 +557,135 @@ int main()
 
    // changeId(UART1, s);
 
-   int16_t torque = 0;
-   int16_t present_speed = 0;
+   // int16_t torque = 0;
+   // int16_t present_speed = 0;
+   // int16_t present_pos = 0;
+   // float present_angle = 0.0;
+   // float present_speed_angle = 0.0;
+   // int16_t prev_pos = 0;
+   // float calc_vel = 0;
+   // float calc_vel_angle = 0.0;
 
-   unsigned long last_time = 0;
-   bool flag = 0;
-   uint16_t speed = 150;
-   uint16_t dt = 2;
+   // unsigned long last_time = 0;
+   // unsigned long prev_time = 0;
+   // bool flag = 1;
+   // bool direction = 0;
+
+   // uint16_t speed = 100;
+   // uint16_t dt = 2;
+
+
+   // changeId(UART1, 6);
+
+   // while (1)
+   // {
+   //    // pingSpecificServo(UART1, s);
+
+   //    if (checkKeyButton())
+   //    {
+   //       flag = !flag;
+   //    }
+
+   //    if (flag == 0)
+   //    {
+   //       setVelocity(6, 0);
+   //    }
+   //    else
+   //    {
+   //       torque = getTorque(6);
+   //       present_speed = getVelocity(6);
+   //       present_pos = getAngle(6);
+   //       present_angle = (float)present_pos * 300.0 / 1024.0;
+
+   //       torque = torque & 0x7FF;
+
+   //       if ((torque & 1 << 10))
+   //       {
+   //          torque &= ~(1 << 10);
+   //          torque = -torque;
+   //       }
+
+   //       present_speed = present_speed & 0x7FF;
+
+   //       if ((present_speed & 1 << 10))
+   //       {
+   //          present_speed &= ~(1 << 10);
+   //          present_speed = -present_speed;
+   //       }
+
+
+   //       // if (HAL_GetTick() >= (last_time + dt * 1000))
+   //       // {
+   //       //    last_time = HAL_GetTick();
+
+   //       //    flag = !flag;
+
+   //       //    if (flag)
+   //       //    {
+   //       //       setVelocity(6, speed);
+   //       //    }
+   //       //    else
+   //       //    {
+   //       //       setVelocity(6, speed + 1024);
+   //       //    }
+   //       // }
+
+   //       uint64_t DT;
+   //       DT = HAL_GetTick() - prev_time;
+   //       // UART_printStr("dt: ");
+   //       // UART_print(DT);
+
+   //       calc_vel = (float)(present_pos - prev_pos) * 1000.0 / (float)DT;
+   //       calc_vel_angle = (calc_vel * 300.0 / 1024.0);
+   //       present_speed_angle = present_speed * 0.674;
+
+   //       UART_printStr(" M: ");
+   //       UART_print(torque);
+   //       // UART_printStr(" PS: ");
+   //       // UART_print(present_speed);
+   //       UART_printStr(" PSA: ");
+   //       UART_printDiv(present_speed_angle);
+   //       // UART_printStr(" pos: ");
+   //       // UART_print(present_pos);
+   //       UART_printStr(" ang: ");
+   //       UART_printDiv(present_angle);
+   //       // UART_printStr(" clc vel: ");
+   //       // UART_printDiv(calc_vel);
+   //       UART_printStr(" clc va: ");
+   //       UART_printDivLn(calc_vel_angle);
+
+   //       if (present_pos > 900)
+   //       {
+   //          direction = 0;
+   //       }
+   //       else if (present_pos < 123)
+   //       {
+   //          direction = 1;
+   //       }
+
+   //       if (direction == 1)
+   //       {
+   //          setVelocity(6, speed * 2);
+   //       }
+   //       else
+   //       {
+   //          // setVelocity(6, speed + 1024);
+   //       }
+
+
+   //    }
+
+   //    prev_time = HAL_GetTick();
+   //    prev_pos = present_pos;
+
+   //    led_loop(1);
+   //    HAL_Delay(100);
+   //    led_loop(0);
+   // }
 
    while (1)
    {
-      // pingSpecificServo(UART1, s);
-
-      if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == 1)
-      {
-         UART_printLn(1);
-      }
-      else
-      {
-         UART_printLn(0);
-      }
-
-      torque = getTorque(6);
-      present_speed = getVelocity(6);
-
-      torque = torque & 0x7FF;
-
-      if ((torque & 1 << 10))
-      {
-         torque &= ~(1 << 10);
-         torque = -torque;
-         // torque = torque - 1024;
-      }
-
-      present_speed = present_speed & 0x7FF;
-
-      if ((present_speed & 1 << 10))
-      {
-         present_speed &= ~(1 << 10);
-         present_speed = -present_speed;
-         // present_speed = present_speed - 1024;
-      }
-
-
-      // if (HAL_GetTick() >= (last_time + dt * 1000))
-      // {
-      //    last_time = HAL_GetTick();
-
-      //    flag = !flag;
-
-      //    if (flag)
-      //    {
-      //       setVelocity(6, speed);
-      //    }
-      //    else
-      //    {
-      //       setVelocity(6, speed + 1024);
-      //    }
-      // }
-
-
-      UART_printStr("M: ");
-      UART_print(torque);
-      UART_printStr(" PS: ");
-      UART_printLn(present_speed);
-
-      led_loop(1);
-      HAL_Delay(100);
-      led_loop(0);
+      dynamixelTest();
    }
 
    return 0;

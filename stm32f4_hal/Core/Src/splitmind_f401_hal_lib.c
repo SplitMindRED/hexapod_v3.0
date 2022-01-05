@@ -124,6 +124,10 @@ void UART_printDiv(double data)
 
    UART_print(number_left);
    UART_sendByte('.');
+   if (rounding / 10 == 0)
+   {
+      UART_print(0);
+   }
    UART_print(number_right);
 }
 
