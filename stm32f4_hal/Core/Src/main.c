@@ -70,8 +70,8 @@ void initPeriph()
    // MX_SPI1_Init();
    // HAL_SPI_MspInit(&hspi1);
 
-   // MX_I2C1_Init();
-   // HAL_I2C_MspInit(&hi2c1);
+   MX_I2C1_Init();
+   HAL_I2C_MspInit(&hi2c1);
 
    // MX_ADC1_Init();
    // HAL_ADC_MspInit(&hadc1);

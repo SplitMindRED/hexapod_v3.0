@@ -331,7 +331,7 @@ int8_t wheelMode(uint8_t servo_id)
    }
 }
 
-int16_t getAngle(uint8_t servo_id)
+uint16_t getAngle(uint8_t servo_id)
 {
    unsigned char packet[8];
    unsigned char checksum = 0;
@@ -475,11 +475,11 @@ int16_t getVelocity(uint8_t servo_id)
 
       servo[servo_id].velocity = vel;
 
-      // if ((vel & 1 << 10))
-      // {
-      //    vel &= ~(1 << 10);
-      //    vel = -vel;
-      // }
+      if ((vel & 1 << 10))
+      {
+         vel &= ~(1 << 10);
+         vel = -vel;
+      }
 
       led_error(0);
 
@@ -555,11 +555,11 @@ int16_t getTorque(uint8_t servo_id)
 
       servo[servo_id].load = torque;
 
-      // if ((torque & 1 << 10))
-      // {
-      //    torque &= ~(1 << 10);
-      //    torque = -torque;
-      // }
+      if ((torque & 1 << 10))
+      {
+         torque &= ~(1 << 10);
+         torque = -torque;
+      }
 
       led_error(0);
 
@@ -731,12 +731,12 @@ int8_t setTorqueLimit(uint8_t servo_id, int16_t torque_limit)
 
    unsigned char packet[9];
 
-   checksum = (~(servo_id + 5 + AX_WRITE_DATA + AX_TORQUE_LIMIT_L + torque_limit_L + torque_limit_H));
+   checksum = (~(servo_id + AX_2_BYTE_WRITE + AX_WRITE_DATA + AX_TORQUE_LIMIT_L + torque_limit_L + torque_limit_H));
 
    packet[0] = AX_START;
    packet[1] = AX_START;
    packet[2] = servo_id;
-   packet[3] = 5;
+   packet[3] = AX_2_BYTE_WRITE;
    packet[4] = AX_WRITE_DATA;
    packet[5] = AX_TORQUE_LIMIT_L;
    packet[6] = torque_limit_L;
@@ -980,3 +980,163 @@ int8_t changeId(UART_HandleTypeDef *huart, uint8_t new_id)
       return ERROR;
    }
 }
+
+int16_t getAverage(int16_t dq, uint8_t avr_num)
+{
+   static bool is_init_done = false;
+   static bool is_first_done = false;
+   static int16_t array[20];
+   static uint8_t counter = 0;
+
+   if (is_first_done == false)
+   {
+      for (uint8_t i = 0; i < avr_num; i++)
+      {
+         array[avr_num];
+      }
+
+      is_first_done = true;
+   }
+   else
+   {
+      if (is_init_done == false)
+      {
+         if (counter < avr_num)
+         {
+            array[counter] = dq;
+            counter++;
+         }
+         else
+         {
+            is_init_done = true;
+         }
+      }
+      else
+      {
+         for (uint8_t i = 0; i < (avr_num - 1); i++)
+         {
+            array[i] = array[i + 1];
+         }
+
+         array[avr_num - 1] = dq;
+
+         int16_t sum = 0;
+
+         for (uint8_t i = 0; i < avr_num; i++)
+         {
+            sum += array[i];
+         }
+
+         return (sum / avr_num);
+      }
+   }
+
+   return 0;
+}
+
+void impedanceControl(uint8_t servo_id, float Kp, float Kd, uint16_t q_d, int16_t dq_d)
+{
+   static bool is_init_done = false;
+   uint16_t q_a = 0;
+   int16_t dq_a = 0;
+   int16_t dq_avr = 0;
+   int16_t tau = 0;
+   int16_t load = 0;
+   uint16_t torque_limit = 500;
+   static bool direction = true;
+   static int16_t dq_des = 200;
+   uint8_t avr_num = 20;
+
+   float dq_eval = 0;
+   static int16_t q_prev = 0;
+
+   static unsigned long time_prev = 0;
+   unsigned long dt = 0;
+
+   if (is_init_done == false)
+   {
+      wheelMode(3);
+      time_prev = HAL_GetTick();
+      q_a = getAngle(3);
+      q_prev = q_a;
+
+      getAverage(dq_a, avr_num);
+
+      is_init_done = true;
+   }
+   else
+   {
+      q_a = getAngle(3);
+      dt = HAL_GetTick() - time_prev;
+      time_prev = HAL_GetTick();
+      dq_a = getVelocity(3);
+      dq_avr = getAverage(dq_a, avr_num);
+      load = getTorque(3);
+
+      dq_eval = (float)(((float)(q_a - q_prev)) / ((float)dt));
+      dq_eval = dq_eval * 1000;
+
+
+
+      if ((q_a > 950) && (direction == true))
+      {
+         dq_des = -dq_des;
+         // dq_d = -dq_d;
+         UART_printStr("true: ");
+         UART_printDivLn(dq_d);
+         direction = false;
+      }
+
+      if ((q_a < 50) && (direction == false))
+      {
+         dq_des = -dq_des;
+         // dq_d = -dq_d;
+         UART_printStr("false: ");
+         UART_printDivLn(dq_d);
+         direction = true;
+      }
+
+      // tau = (int16_t)(Kp * ((float)(q_d - q_a)) + Kd * ((float)(dq_des - dq_a)));
+      tau = (int16_t)(Kp * ((float)(q_d - q_a)) + Kd * ((float)(dq_des - dq_avr)));
+
+      UART_printStr("dt: ");
+      UART_print(dt);
+      UART_printStr(" q_a: ");
+      UART_print(q_a);
+      UART_printStr(" dq_a: ");
+      UART_print(dq_a);
+      // UART_printStr(" dq_ev: ");
+      // UART_print(dq_eval);
+      UART_printStr(" dq_avr: ");
+      UART_printDiv(dq_avr);
+      // UART_printStr(" q_e: ");
+      // UART_print(q_d - q_a);
+      UART_printStr(" dq_e: ");
+      UART_print(dq_des - dq_avr);
+      // UART_printStr(" load: ");
+      // UART_print(load);
+      UART_printStr(" tau: ");
+      UART_printLn(tau);
+
+      q_prev = q_a;
+
+      if (tau > torque_limit)
+      {
+         tau = torque_limit;
+      }
+      else if (tau < 0)
+      {
+         if (tau < -torque_limit)
+         {
+            tau = -torque_limit;
+         }
+
+         tau = -tau;
+
+         tau |= 1 << 10;
+      }
+
+      setVelocity(3, tau);
+   }
+}
+

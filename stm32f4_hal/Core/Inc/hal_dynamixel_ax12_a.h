@@ -123,6 +123,7 @@
 #define RIGHT                       1
 #define AX_BYTE_READ                1
 #define AX_2_BYTE_READ              2
+#define AX_2_BYTE_WRITE             5
 #define AX_PING_LENGTH				   2
 #define AX_RESET_LENGTH				   2
 #define AX_ACTION_LENGTH			   2
@@ -207,7 +208,7 @@ int8_t jointMode(uint8_t servo_id);
 int8_t wheelMode(uint8_t servo_id);
 
 //0..1023
-int16_t getAngle(uint8_t servo_id);
+uint16_t getAngle(uint8_t servo_id);
 
 //0..2047 | 0..1023 - CCW, 1024..2047 - CW
 int16_t getVelocity(uint8_t servo_id);
@@ -228,5 +229,9 @@ int8_t getTorqueEnable(uint8_t servo_id);
 int8_t disableTorque(uint8_t servo_id);
 
 ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer);
+
+void impedanceControl(uint8_t servo_id, float Kp, float Kd, uint16_t q_d, int16_t dq_d);
+
+int16_t getAverage(int16_t dq, uint8_t avr_num);
 
 #endif

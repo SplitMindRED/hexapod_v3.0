@@ -13,7 +13,17 @@
 #include "mpu9250.h"
 
 #define MPU9250_ADDRESS 0xD0
-#define WHO_AM_I  0x75
+#define WHO_AM_I        0x75
+#define INA219_ADDRESS  0x82
+#define CONFIGURATION   0x00
+#define CURRENT         0x04
+#define SHUNT_VOLTAGE   0x01
+
+uint8_t config[2];
+uint8_t reg = CONFIGURATION;
+uint16_t configuration = 0;
+int16_t current = 0;
+bool is_new_data = false;
 
 uint8_t data1[2] = { 17, 99 };
 uint8_t data2[2] = { 0, 0 };
@@ -196,7 +206,7 @@ void testAngleVel(uint8_t servo_id)
 //feedback test of desired servo
 void servoTest(uint8_t servo_id)
 {
-   int16_t angle = 0;
+   uint16_t angle = 0;
    int16_t vel = 0;
    int16_t torque = 0;
 
@@ -396,16 +406,21 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
    //start waiting for recieve interrupt
-   HAL_I2C_Master_Receive_IT(&hi2c1, MPU9250_ADDRESS, &byte, 1);
+   // HAL_I2C_Master_Receive_IT(&hi2c1, MPU9250_ADDRESS, &byte, 1);
+   HAL_I2C_Master_Receive_IT(&hi2c1, INA219_ADDRESS, config, 2);
 }
 
 //recieve data interrupt
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
    // I2C data ready!
-   UART_printStr("MPU WHO AM I: ");
-   UART_printLn(byte);
+   // UART_printStr("MPU WHO AM I: ");
+   // UART_printLn(byte);
    // byte = 0;
+
+   current = config[0] << 8 | config[1];
+
+   is_new_data = true;
 }
 
 void measureVbat()
@@ -485,29 +500,64 @@ void measureCurrent()
    UART_printDivLn(current);
 }
 
+void readCurrent(void)
+{
+   reg = SHUNT_VOLTAGE;
+   HAL_I2C_Master_Transmit_IT(&hi2c1, INA219_ADDRESS, &reg, 1);
+}
+
+void printData(void)
+{
+   if (is_new_data)
+   {
+      UART_printStr(" Current: ");
+
+      UART_print(-current / 10);
+      UART_printStrLn(" mA");
+
+      // UART_printLn(configuration);
+
+      is_new_data = false;
+   }
+}
+
 void dynamixelTest(void)
 {
+   readCurrent();
+
    // changeId(UART1, 3);
    // servoTest(3);
    // setTorqueLimit(3, 300);
+
    // jointMode(3);
    // wheelMode(3);
-   int16_t q = 99;
+
+   uint16_t q = 99;
    int16_t dq = 99;
    int16_t torque = 99;
    torque = getTorque(3);
    q = getAngle(3);
    dq = getVelocity(3);
-   UART_printStr("q: ");
-   UART_print(q);
-   UART_printStr(" dq: ");
-   UART_print(dq);
-   UART_printStr(" t: ");
-   UART_printLn(torque);
+
+   if (is_new_data)
+   {
+
+      UART_printStr("q: ");
+      UART_print(q);
+      UART_printStr(" dq: ");
+      UART_print(dq);
+      UART_printStr(" t: ");
+      UART_print(torque);
+
+      printData();
+
+   }
+
 
    // setAngle(3, 512);
-   setVelocity(3, 600 + 1024);
-   // UART_printLn(1);
+   setVelocity(3, 300 + 1024);
+
+   // impedanceControl(3, 0, 1.5, 500, 100);
 }
 
 int main()
