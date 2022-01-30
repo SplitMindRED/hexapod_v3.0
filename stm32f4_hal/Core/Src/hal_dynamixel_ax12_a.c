@@ -981,29 +981,29 @@ int8_t changeId(UART_HandleTypeDef *huart, uint8_t new_id)
    }
 }
 
-int16_t getAverage(int16_t dq, uint8_t avr_num)
+int16_t getAverage(int16_t dq, uint8_t avr_num, int16_t *p_array)
 {
    static bool is_init_done = false;
    static bool is_first_done = false;
-   static int16_t array[20];
    static uint8_t counter = 0;
 
    if (is_first_done == false)
    {
       for (uint8_t i = 0; i < avr_num; i++)
       {
-         array[avr_num];
+         p_array[i] = 0;
       }
 
       is_first_done = true;
    }
-   else
+
+   if (is_first_done == true)
    {
       if (is_init_done == false)
       {
          if (counter < avr_num)
          {
-            array[counter] = dq;
+            p_array[counter] = dq;
             counter++;
          }
          else
@@ -1015,16 +1015,16 @@ int16_t getAverage(int16_t dq, uint8_t avr_num)
       {
          for (uint8_t i = 0; i < (avr_num - 1); i++)
          {
-            array[i] = array[i + 1];
+            p_array[i] = p_array[i + 1];
          }
 
-         array[avr_num - 1] = dq;
+         p_array[avr_num - 1] = dq;
 
          int16_t sum = 0;
 
          for (uint8_t i = 0; i < avr_num; i++)
          {
-            sum += array[i];
+            sum += p_array[i];
          }
 
          return (sum / avr_num);
@@ -1046,6 +1046,7 @@ void impedanceControl(uint8_t servo_id, float Kp, float Kd, uint16_t q_d, int16_
    static bool direction = true;
    static int16_t dq_des = 200;
    uint8_t avr_num = 20;
+   int16_t dq_arr[40];
 
    float dq_eval = 0;
    static int16_t q_prev = 0;
@@ -1060,7 +1061,7 @@ void impedanceControl(uint8_t servo_id, float Kp, float Kd, uint16_t q_d, int16_
       q_a = getAngle(3);
       q_prev = q_a;
 
-      getAverage(dq_a, avr_num);
+      getAverage(dq_a, avr_num, dq_arr);
 
       is_init_done = true;
    }
@@ -1070,7 +1071,7 @@ void impedanceControl(uint8_t servo_id, float Kp, float Kd, uint16_t q_d, int16_
       dt = HAL_GetTick() - time_prev;
       time_prev = HAL_GetTick();
       dq_a = getVelocity(3);
-      dq_avr = getAverage(dq_a, avr_num);
+      dq_avr = getAverage(dq_a, avr_num, dq_arr);
       load = getTorque(3);
 
       dq_eval = (float)(((float)(q_a - q_prev)) / ((float)dt));

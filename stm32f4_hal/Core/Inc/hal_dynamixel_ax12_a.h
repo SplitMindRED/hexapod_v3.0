@@ -232,6 +232,6 @@ ServoResponse checkResponse(uint8_t servo_id, uint8_t *p_answer);
 
 void impedanceControl(uint8_t servo_id, float Kp, float Kd, uint16_t q_d, int16_t dq_d);
 
-int16_t getAverage(int16_t dq, uint8_t avr_num);
+int16_t getAverage(int16_t dq, uint8_t avr_num, int16_t *p_array);
 
 #endif

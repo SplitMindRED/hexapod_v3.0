@@ -20,10 +20,12 @@
 #define SHUNT_VOLTAGE   0x01
 
 uint8_t config[2];
+uint8_t config_reg[3];
 uint8_t reg = CONFIGURATION;
 uint16_t configuration = 0;
 int16_t current = 0;
 bool is_new_data = false;
+bool is_i2c_reading = false;
 
 uint8_t data1[2] = { 17, 99 };
 uint8_t data2[2] = { 0, 0 };
@@ -407,7 +409,12 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
    //start waiting for recieve interrupt
    // HAL_I2C_Master_Receive_IT(&hi2c1, MPU9250_ADDRESS, &byte, 1);
-   HAL_I2C_Master_Receive_IT(&hi2c1, INA219_ADDRESS, config, 2);
+
+   if (is_i2c_reading == true)
+   {
+      HAL_I2C_Master_Receive_IT(&hi2c1, INA219_ADDRESS, config, 2);
+      is_i2c_reading = false;
+   }
 }
 
 //recieve data interrupt
@@ -503,7 +510,23 @@ void measureCurrent()
 void readCurrent(void)
 {
    reg = SHUNT_VOLTAGE;
+   is_i2c_reading = true;
    HAL_I2C_Master_Transmit_IT(&hi2c1, INA219_ADDRESS, &reg, 1);
+}
+
+void readConfig(void)
+{
+   reg = CONFIGURATION;
+   is_i2c_reading = true;
+   HAL_I2C_Master_Transmit_IT(&hi2c1, INA219_ADDRESS, &reg, 1);
+}
+
+void initINA219(void)
+{
+   config_reg[0] = CONFIGURATION;
+   config_reg[1] = 0x39;
+   config_reg[2] = 0xDF;
+   HAL_I2C_Master_Transmit_IT(&hi2c1, INA219_ADDRESS, config_reg, 3);
 }
 
 void printData(void)
@@ -512,7 +535,7 @@ void printData(void)
    {
       UART_printStr(" Current: ");
 
-      UART_print(-current / 10);
+      UART_print(current / 10);
       UART_printStrLn(" mA");
 
       // UART_printLn(configuration);
@@ -535,27 +558,36 @@ void dynamixelTest(void)
    uint16_t q = 99;
    int16_t dq = 99;
    int16_t torque = 99;
+   int16_t dq_avr = 99;
+   int16_t torque_avr = 99;
+   static int16_t dq_arr[40];
+   static int16_t torque_arr[40];
+
    torque = getTorque(3);
    q = getAngle(3);
    dq = getVelocity(3);
 
+   dq_avr = getAverage(dq, 40, dq_arr);
+   torque_avr = getAverage(torque, 40, torque_arr);
+
    if (is_new_data)
    {
-
       UART_printStr("q: ");
       UART_print(q);
+      UART_printStr(" dq_avr: ");
+      UART_print(dq_avr);
+      UART_printStr(" t_avr: ");
+      UART_print(torque_avr);
       UART_printStr(" dq: ");
       UART_print(dq);
       UART_printStr(" t: ");
       UART_print(torque);
 
       printData();
-
    }
 
-
-   // setAngle(3, 512);
-   setVelocity(3, 300 + 1024);
+   setAngle(3, 1023);
+   setVelocity(3, 100);
 
    // impedanceControl(3, 0, 1.5, 500, 100);
 }
@@ -732,6 +764,12 @@ int main()
    //    HAL_Delay(100);
    //    led_loop(0);
    // }
+
+   initINA219();
+   setVelocity(3, 500);
+   setAngle(3, 0);
+   HAL_Delay(1500);
+   readConfig();
 
    while (1)
    {
