@@ -1,6 +1,6 @@
 /***********************************************
  * Main file
-************************************************/
+ ************************************************/
 
 #include "main.h"
 #include "usart.h"
@@ -13,11 +13,11 @@
 #include "mpu9250.h"
 
 #define MPU9250_ADDRESS 0xD0
-#define WHO_AM_I        0x75
-#define INA219_ADDRESS  0x82
-#define CONFIGURATION   0x00
-#define CURRENT         0x04
-#define SHUNT_VOLTAGE   0x01
+#define WHO_AM_I 0x75
+#define INA219_ADDRESS 0x82
+#define CONFIGURATION 0x00
+#define CURRENT 0x04
+#define SHUNT_VOLTAGE 0x01
 
 uint8_t config[2];
 uint8_t config_reg[3];
@@ -27,11 +27,11 @@ int16_t current = 0;
 bool is_new_data = false;
 bool is_i2c_reading = false;
 
-uint8_t data1[2] = { 17, 99 };
-uint8_t data2[2] = { 0, 0 };
+uint8_t data1[2] = {17, 99};
+uint8_t data2[2] = {0, 0};
 
-int16_t servoData[6] = { 0, 0, 0, 0, 0, 0 };
-int16_t dummy[6] = { 0, 0, 0, 0, 0, 0 };
+int16_t servoData[6] = {0, 0, 0, 0, 0, 0};
+int16_t dummy[6] = {0, 0, 0, 0, 0, 0};
 
 uint8_t byte = 0;
 uint8_t reg_address = WHO_AM_I;
@@ -40,7 +40,7 @@ bool flag = 0;
 
 void setup()
 {
-   //init all periph with HAL generated functions
+   // init all periph with HAL generated functions
    initPeriph();
 
    // led_error(1);
@@ -53,7 +53,7 @@ void setup()
    // initAllDynamixel();
 }
 
-//for button on NUCLEO
+// for button on NUCLEO
 void pushButton()
 {
    // if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == 1)
@@ -70,7 +70,7 @@ bool checkKeyButton()
 {
    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == 1)
    {
-      //button is NOT pressed
+      // button is NOT pressed
 
       // UART_printLn(1);
       return 0;
@@ -78,15 +78,14 @@ bool checkKeyButton()
    else
    {
       HAL_Delay(300);
-      //button is pressed
+      // button is pressed
 
       // UART_printLn(0);
       return 1;
    }
 }
 
-
-//test specific servo with move CW and CCW with desired pause
+// test specific servo with move CW and CCW with desired pause
 void testMoveServo(uint8_t servo_id, uint16_t pause)
 {
    uint16_t speed = 150;
@@ -179,7 +178,6 @@ void testAngleVel(uint8_t servo_id)
 
    HAL_Delay(1000);
 
-
    setVelocity(servo_id, vt + 1024);
 
    vel = getVelocity(servo_id);
@@ -205,7 +203,7 @@ void testAngleVel(uint8_t servo_id)
    HAL_Delay(1000);
 }
 
-//feedback test of desired servo
+// feedback test of desired servo
 void servoTest(uint8_t servo_id)
 {
    uint16_t angle = 0;
@@ -250,7 +248,6 @@ void servoTest(uint8_t servo_id)
    UART_printDivLn(torque);
 
    HAL_Delay(1000);
-
 }
 
 void legTest(uint8_t leg_num)
@@ -324,7 +321,7 @@ void legDataTest(uint8_t leg_num)
 
 void copyLegMovement()
 {
-   int16_t angle[3] = { 0, 0, 0 };
+   int16_t angle[3] = {0, 0, 0};
 
    // jointMode(3);
    // jointMode(4);
@@ -346,7 +343,7 @@ void copyLegMovement()
    UART_printDivLn(angle[2] * (float)300 / (float)1024);
 }
 
-//for spi
+// for spi
 void transferData()
 {
    // int16_t angle = 0;
@@ -387,12 +384,12 @@ void transferData()
    servoData[5] = getTorque(2);
 }
 
-//recieve spi interrupt
+// recieve spi interrupt
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
    flag = 1;
 
-   //test transfer
+   // test transfer
    HAL_SPI_TransmitReceive_IT(&hspi1, data1, data2, 2);
 
    UART_printStr("b1: ");
@@ -400,15 +397,15 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
    UART_printStr(" b2: ");
    UART_printLn(data2[1]);
 
-   //for visual force of leg
-   // HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
+   // for visual force of leg
+   //  HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t *)servoData, (uint8_t *)dummy, sizeof(servoData));
 }
 
-//interruption after tx
+// interruption after tx
 void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
-   //start waiting for recieve interrupt
-   // HAL_I2C_Master_Receive_IT(&hi2c1, MPU9250_ADDRESS, &byte, 1);
+   // start waiting for recieve interrupt
+   //  HAL_I2C_Master_Receive_IT(&hi2c1, MPU9250_ADDRESS, &byte, 1);
 
    if (is_i2c_reading == true)
    {
@@ -417,7 +414,7 @@ void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
    }
 }
 
-//recieve data interrupt
+// recieve data interrupt
 void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
    // I2C data ready!
@@ -459,7 +456,6 @@ void measureVbat()
    avr_raw = avr_raw / (float)avr;
    // UART_printDiv(avr_raw);
    // UART_printStr(" ");
-
 
    v_raw = (float)avr_raw / 4096 * (float)3.3;
    UART_printDiv(v_raw);
@@ -627,7 +623,6 @@ int main()
 
    // setAngle(6, 512);
 
-
    // setAngle(8, 0);
 
    // jointMode(6);
@@ -655,7 +650,6 @@ int main()
 
    // uint16_t speed = 100;
    // uint16_t dt = 2;
-
 
    // changeId(UART1, 6);
 
@@ -694,7 +688,6 @@ int main()
    //          present_speed &= ~(1 << 10);
    //          present_speed = -present_speed;
    //       }
-
 
    //       // if (HAL_GetTick() >= (last_time + dt * 1000))
    //       // {
@@ -753,7 +746,6 @@ int main()
    //       {
    //          // setVelocity(6, speed + 1024);
    //       }
-
 
    //    }
 
